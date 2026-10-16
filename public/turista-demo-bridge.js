@@ -7,7 +7,7 @@ const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'
 let active=null,timer=null;
 const originalSearch=window.search;
 window.search=function(){
- if(!window.T?.from||!window.T?.to){originalSearch();return}
+ if(typeof T==='undefined'||!T.from||!T.to){originalSearch();return}
  const ref=id(), d={id:ref,from:T.from,to:T.to,when:T.date,pax:T.n,luggage:lug,category:T.n<=8?'Vito / Caravelle':T.n<=16?'Sprinter':'Midibüs',status:'new',created:Date.now(),offers:[]};
  write([d,...read()]);
  active=ref;
