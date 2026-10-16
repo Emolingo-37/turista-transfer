@@ -145,6 +145,53 @@ footer{padding-left:max(20px,calc((100% - 780px)/2));padding-right:max(20px,calc
 .pc .im img:not([src]),.pl .im img:not([src]){display:none}
 .big{background-size:cover!important;background-position:center!important;position:relative;isolation:isolate;overflow:hidden;text-shadow:0 2px 8px #0009}
 .big:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#0a234233,#0a2342c9);z-index:-1}
+
+/* Turista photographic service cards — separate desktop and mobile layouts */
+#routes .big{position:relative;isolation:isolate;overflow:hidden;background-color:#183b5c!important;background-size:cover!important;background-position:center!important;color:#fff!important;text-shadow:none;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;border:1px solid #ffffff25;box-shadow:0 12px 30px #0a23421f;transition:transform .22s ease,box-shadow .22s ease}
+#routes .big:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#071a3050 0%,#071a3010 32%,#071a30e8 100%);z-index:-1}
+#routes .big:hover{box-shadow:0 20px 34px #0a234236;transform:translateY(-4px)}
+#routes .service-icon{width:39px;height:39px;border-radius:13px;border:1px solid #ffffff55;display:grid;place-items:center;background:#ffffff2e;backdrop-filter:blur(10px);font-size:20px;animation:none!important;filter:none!important;line-height:1}
+#routes .service-copy{display:flex;flex-direction:column;gap:6px;min-width:0}
+#routes .service-copy strong{color:#fff;font-size:15px;font-weight:800;line-height:1.22;letter-spacing:-.02em}
+#routes .service-copy small{display:block;color:#ffffffdc;font-size:11px;font-weight:500;line-height:1.35}
+#homeplaces .pc,#places .pl{box-shadow:0 5px 22px #0a23420b;transition:transform .22s ease,box-shadow .22s ease}
+#homeplaces .pc .im{height:126px}
+#homeplaces .pc>div:last-child{padding:12px 13px 14px;font-size:14px;color:var(--p);line-height:1.22}
+#homeplaces .pc small{margin-top:5px}
+#places .pl .im{height:196px}
+#places .pl .bd{padding:17px}
+#places .pl h3{font-size:18px}
+#places .pl p{line-height:1.6}
+#homeplaces .pc .im img,#places .pl .im img{width:100%;height:100%;object-fit:cover}
+#homeplaces .pc .im .fallback,#places .pl .im .fallback{z-index:1}
+@media(min-width:1024px){
+#routes{gap:14px}
+#routes .big{height:205px;padding:15px;border-radius:23px}
+#routes .service-icon{width:35px;height:35px;font-size:18px}
+#routes .service-copy strong{font-size:14px}
+#routes .service-copy small{font-size:10.5px}
+#homeplaces{gap:14px}
+#homeplaces .pc .im{height:132px}
+#places{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(min-width:1024px) and (max-width:1320px){
+#routes{grid-template-columns:repeat(2,minmax(0,1fr))}
+#routes .big{height:175px}
+}
+@media(max-width:1023px){
+#routes{display:flex;gap:12px;overflow-x:auto;padding:0 18px 10px;margin:0 -18px;scroll-snap-type:x mandatory;scrollbar-width:none}
+#routes .big{flex:0 0 220px;width:220px;height:183px;border-radius:23px;padding:15px;scroll-snap-align:start}
+#routes .service-copy strong{font-size:16px}
+#routes .service-copy small{font-size:11px}
+#homeplaces{scroll-snap-type:x mandatory;padding-bottom:10px}
+#homeplaces .pc{width:166px;scroll-snap-align:start}
+#homeplaces .pc .im{height:113px}
+#places .pl .im{height:175px}
+}
+@media(min-width:700px) and (max-width:1023px){
+#routes .big{flex-basis:240px;width:240px;height:190px}
+#places{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+}
 </style>
 </head>
 <body>
@@ -228,8 +275,15 @@ function photoCard(name,emoji){return `<img loading="lazy" src="${PHOTO[name]}" 
 $('places').innerHTML=PL.map((p,i)=>`<div class="pl"><div class="im" style="background:${p[3]}">${photoCard(p[0],p[2])}</div><div class="bd"><span class="tag">${p[1]}</span><h3 style="margin-top:8px">${p[0]}</h3><p>${p[4]}</p><button class="sm" onclick="openChat('${p[0]}')">Buraya transfer ayarla</button></div></div>`).join('');
 $('homeplaces').innerHTML=PL.slice(0,5).map(p=>`<div class="pc" onclick="openChat('${p[0]}')"><div class="im" style="background:${p[3]}">${photoCard(p[0],p[2])}</div><div>${p[0]}<small>${p[1]}</small></div></div>`).join('');
 const TL=[['✈️','Havalimanından otele','Havalimanından otele 3 kişiyiz, 2 bavulumuz var','linear-gradient(160deg,#ece8ff,#cdc3ff)'],['👨‍👩‍👧','Aile transferi','Ailemle 5 kişiyiz, çocuk koltuğu lazım','linear-gradient(160deg,#fff1d6,#ffd98a)'],['🚌','Grup transferi','12 kişilik grubumuz var, Sapanca’ya gideceğiz','linear-gradient(160deg,#dbeafe,#a9c6f5)'],['🎈','Kapadokya gezisi','Kapadokya’ya gideceğiz, 4 kişiyiz','linear-gradient(160deg,#fde4f3,#f5b8dc)']];
-const ROUTE_PHOTOS=[PHOTO['Ayasofya'], 'https://unsplash.com/photos/TbsRHso3eRM/download?force=true&w=800', 'https://unsplash.com/photos/x0bwQCSW8m0/download?force=true&w=800', PHOTO['Kapadokya']];
-$('routes').innerHTML=TL.map((t,i)=>`<div class="big" style="background:${t[3]};background-image:linear-gradient(180deg,#0a234222,#0a234288),url('${ROUTE_PHOTOS[i]}')" onclick="openChat(0,0,TL[${i}][2])"><i>${t[0]}</i>${t[1]}</div>`).join('');
+// Each service uses its own matching photograph; never reuse destination photographs for unrelated transfers.
+const ROUTE_PHOTOS=[
+ 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1000&q=85',
+ 'https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1000&q=85',
+ 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1000&q=85',
+ PHOTO['Kapadokya']
+];
+const ROUTE_SUBTITLES=['Terminal karşılama ve özel transfer','Ailece rahat ve güvenli yolculuk','Kalabalık gruplara uygun araçlar','Özel rota ve gezi transferi'];
+$('routes').innerHTML=TL.map((t,i)=>`<div class="big" role="button" tabindex="0" style="background-image:url('${ROUTE_PHOTOS[i]}')" onclick="openChat(0,0,TL[${i}][2])" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openChat(0,0,TL[${i}][2])}"><span class="service-icon" aria-hidden="true">${t[0]}</span><span class="service-copy"><strong>${t[1]}</strong><small>${ROUTE_SUBTITLES[i]}</small></span></div>`).join('');
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x==b));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id=='v-'+b.dataset.t))});
 const SB=supabase.createClient('https://ewrmphldbgvatcnfcxiw.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV3cm1waGxkYmd2YXRjbmZjeGl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwODMwNjksImV4cCI6MjEwNzY1OTA2OX0.wSO5t_aUtfk2_fDHGgsLJiEzHLkaKnrf0e1CB8_ud5U');
 let A={},UID=null;
