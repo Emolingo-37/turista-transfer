@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 export default function Giris() {
@@ -14,37 +14,43 @@ export default function Giris() {
   });
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
 
-  function updateField(e) {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  }
+  useEffect(() => {
+    let active = true;
 
-  async function runWithTimeout(promise, ms = 15000) {
-    let timer;
+    async function checkSession() {
+      try {
+        const { data, error } = await supabase.auth.getSession();
 
-    try {
-      return await Promise.race([
-        promise,
-        new Promise((_, reject) => {
-          timer = setTimeout(
-            () => reject(
-              new Error(
-                "Sunucudan 15 saniye içinde yanıt alınamadı. İnternet bağlantısını kontrol edip tekrar deneyin."
-              )
-            ),
-            ms
-          );
-        }),
-      ]);
-    } finally {
-      clearTimeout(timer);
+        if (!active) return;
+
+        if (!error && data?.session) {
+          window.location.replace("/app.html");
+          return;
+        }
+      } catch (error) {
+        console.error("Oturum kontrolü:", error);
+      }
+
+      if (active) setChecking(false);
     }
+
+    checkSession();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  function updateField(event) {
+    const { name, value } = event.target;
+    setForm(prev => ({ ...prev, [name]: value }));
   }
 
-  async function submit(e) {
-    e.preventDefault();
-
+  async function submit(event) {
+    event.preventDefault();
     if (busy) return;
 
     setBusy(true);
@@ -54,168 +60,342 @@ export default function Giris() {
       const email = form.email.trim().toLowerCase();
 
       if (mode === "login") {
-        const result = await runWithTimeout(
-          supabase.auth.signInWithPassword({
+        const { data, error } =
+          await supabase.auth.signInWithPassword({
             email,
             password: form.password,
-          })
-        );
+          });
 
-        if (result.error) {
-          console.error("Giriş hatası:", result.error);
-          setMessage("Giriş yapılamadı: " + result.error.message);
-          return;
+        if (error) throw error;
+
+        if (!data?.session) {
+          throw new Error("Oturum oluşturulamadı.");
         }
-
-        if (!result.data?.session) {
-          setMessage(
-            "Giriş tamamlandı ancak oturum oluşturulamadı. Tekrar deneyin."
-          );
-          return;
-        }
-
-        setMessage("Giriş başarılı. Uygulama açılıyor...");
 
         window.location.replace("/app.html");
         return;
       }
 
-      const result = await runWithTimeout(
-        supabase.auth.signUp({
-          email,
-          password: form.password,
-          options: {
-            data: {
-              full_name: form.full_name.trim(),
-              phone: form.phone.trim(),
-            },
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password: form.password,
+        options: {
+          data: {
+            full_name: form.full_name.trim(),
+            phone: form.phone.trim(),
           },
-        })
-      );
+        },
+      });
 
-      if (result.error) {
-        console.error("Kayıt hatası:", result.error);
-        setMessage("Kayıt yapılamadı: " + result.error.message);
+      if (error) throw error;
+
+      if (data?.session) {
+        window.location.replace("/app.html");
         return;
       }
 
-      if (!result.data?.session) {
-        setMessage(
-          "Kayıt isteği alındı. E-posta doğrulaması gerekiyorsa gelen kutunu kontrol et."
-        );
-        return;
-      }
-
-      setMessage("Kayıt başarılı. Uygulama açılıyor...");
-      window.location.replace("/app.html");
-    } catch (error) {
-      console.error("Kimlik doğrulama hatası:", error);
       setMessage(
-        error?.message ||
-          "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin."
+        "Kayıt oluşturuldu. E-posta doğrulaması gerekiyorsa gelen kutunuzu kontrol edin."
+      );
+    } catch (error) {
+      setMessage(
+        error?.message || "Bir hata oluştu. Tekrar deneyin."
       );
     } finally {
       setBusy(false);
     }
   }
 
-  function toggleMode() {
-    setMode((prev) => prev === "login" ? "register" : "login");
-    setMessage("");
+  const inputStyle = {
+    width: "100%",
+    border: "1px solid #e2e8f0",
+    background: "#f8fafc",
+    borderRadius: 14,
+    padding: "15px 16px",
+    fontSize: 14,
+    color: "#0a2342",
+    outlineColor: "#d4af37",
+    boxSizing: "border-box",
+    fontFamily: "inherit",
+  };
+
+  if (checking) {
+    return (
+      <main style={{
+        minHeight: "100vh",
+        background: "#0a2342",
+        display: "grid",
+        placeItems: "center",
+        color: "#fff",
+        fontFamily: "system-ui",
+      }}>
+        Turista Transfer yükleniyor...
+      </main>
+    );
   }
 
   return (
-    <main className="mx-auto max-w-md px-5 py-16">
-      <section className="rounded-3xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
-        <h1 className="font-display text-3xl font-bold">
-          {mode === "login" ? "Giriş yap" : "Hesap oluştur"}
-        </h1>
+    <main style={{
+      minHeight: "100vh",
+      background:
+        "radial-gradient(circle at 90% 5%, #203d65, transparent 40%), linear-gradient(150deg, #0a2342, #13315c)",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: "35px 20px",
+      fontFamily:
+        '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", system-ui, sans-serif',
+      boxSizing: "border-box",
+    }}>
+      <div style={{
+        width: "100%",
+        maxWidth: 440,
+      }}>
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          marginBottom: 42,
+        }}>
+          <div style={{
+            width: 44,
+            height: 44,
+            borderRadius: 13,
+            background: "#d4af37",
+            display: "grid",
+            placeItems: "center",
+            color: "#0a2342",
+            fontSize: 23,
+            fontWeight: 800,
+          }}>
+            T
+          </div>
+          <div>
+            <div style={{
+              color: "white",
+              fontSize: 19,
+              fontWeight: 750,
+              letterSpacing: "-0.6px",
+            }}>
+              Turista Transfer
+            </div>
+            <div style={{
+              color: "#a9bed8",
+              fontSize: 12,
+              marginTop: 3,
+            }}>
+              Güvenli transferin adresi
+            </div>
+          </div>
+        </div>
 
-        <form onSubmit={submit} className="mt-6 space-y-3">
-          {mode === "register" && (
-            <>
+        <div style={{ marginBottom: 30 }}>
+          <h1 style={{
+            color: "#fff",
+            fontSize: 36,
+            letterSpacing: "-1.5px",
+            lineHeight: 1.15,
+            margin: 0,
+            fontWeight: 750,
+          }}>
+            Yolculuğunuz
+            <br />
+            burada başlar.
+          </h1>
+
+          <p style={{
+            color: "#bfcee0",
+            fontSize: 14,
+            lineHeight: 1.7,
+            marginTop: 16,
+          }}>
+            Size özel transfer deneyimi,
+            birkaç dokunuş uzağınızda.
+          </p>
+        </div>
+
+        <section style={{
+          background: "#fff",
+          borderRadius: 28,
+          padding: "30px 26px",
+          boxShadow: "0 25px 65px #00000030",
+        }}>
+          <h2 style={{
+            color: "#0a2342",
+            fontSize: 25,
+            margin: 0,
+            letterSpacing: "-0.8px",
+            fontWeight: 750,
+          }}>
+            {mode === "login"
+              ? "Tekrar hoş geldiniz."
+              : "Aramıza hoş geldiniz."}
+          </h2>
+
+          <p style={{
+            color: "#64748b",
+            fontSize: 13,
+            marginTop: 9,
+            marginBottom: 25,
+          }}>
+            {mode === "login"
+              ? "Hesabınıza giriş yaparak devam edin."
+              : "Yeni hesabınızı oluşturun."}
+          </p>
+
+          <form onSubmit={submit} style={{
+            display: "grid",
+            gap: 13,
+          }}>
+            {mode === "register" && (
+              <>
+                <input
+                  style={inputStyle}
+                  name="full_name"
+                  placeholder="Ad Soyad"
+                  autoComplete="name"
+                  value={form.full_name}
+                  onChange={updateField}
+                  required
+                />
+
+                <input
+                  style={inputStyle}
+                  name="phone"
+                  type="tel"
+                  placeholder="Telefon numarası"
+                  autoComplete="tel"
+                  value={form.phone}
+                  onChange={updateField}
+                  required
+                />
+              </>
+            )}
+
+            <input
+              style={inputStyle}
+              name="email"
+              type="email"
+              placeholder="E-posta adresiniz"
+              autoComplete="email"
+              value={form.email}
+              onChange={updateField}
+              required
+            />
+
+            <div style={{ position: "relative" }}>
               <input
-                className="field"
-                name="full_name"
-                placeholder="Ad soyad"
-                autoComplete="name"
-                value={form.full_name}
+                style={{
+                  ...inputStyle,
+                  paddingRight: 76,
+                }}
+                name="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Şifreniz"
+                minLength={6}
+                autoComplete={
+                  mode === "login"
+                    ? "current-password"
+                    : "new-password"
+                }
+                value={form.password}
                 onChange={updateField}
                 required
               />
 
-              <input
-                className="field"
-                name="phone"
-                type="tel"
-                placeholder="Telefon (05xx xxx xx xx)"
-                autoComplete="tel"
-                value={form.phone}
-                onChange={updateField}
-                required
-              />
-            </>
-          )}
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: "absolute",
+                  right: 12,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  border: 0,
+                  background: "transparent",
+                  color: "#64748b",
+                  fontSize: 12,
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                }}
+              >
+                {showPassword ? "Gizle" : "Göster"}
+              </button>
+            </div>
 
-          <input
-            className="field"
-            name="email"
-            type="email"
-            placeholder="E-posta"
-            autoComplete="email"
-            value={form.email}
-            onChange={updateField}
-            required
-          />
+            {message && (
+              <p role="alert" style={{
+                background: "#fff7e5",
+                borderRadius: 12,
+                padding: 13,
+                color: "#8a5700",
+                fontSize: 13,
+                lineHeight: 1.6,
+                margin: 0,
+              }}>
+                {message}
+              </p>
+            )}
 
-          <input
-            className="field"
-            name="password"
-            type="password"
-            placeholder="Şifre (en az 6 karakter)"
-            autoComplete={
-              mode === "login" ? "current-password" : "new-password"
-            }
-            minLength={6}
-            value={form.password}
-            onChange={updateField}
-            required
-          />
-
-          {message && (
-            <p
-              role="alert"
-              aria-live="polite"
-              className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900"
+            <button
+              type="submit"
+              disabled={busy}
+              style={{
+                background: "#d4af37",
+                color: "#0a2342",
+                border: "none",
+                borderRadius: 14,
+                padding: 16,
+                fontSize: 15,
+                fontWeight: 750,
+                cursor: busy ? "wait" : "pointer",
+                opacity: busy ? 0.65 : 1,
+                marginTop: 8,
+                fontFamily: "inherit",
+              }}
             >
-              {message}
-            </p>
-          )}
+              {busy
+                ? "İşleniyor..."
+                : mode === "login"
+                  ? "Giriş Yap →"
+                  : "Hesap Oluştur →"}
+            </button>
+          </form>
 
           <button
-            className="btn w-full"
-            type="submit"
+            type="button"
             disabled={busy}
+            onClick={() => {
+              setMode(mode === "login" ? "register" : "login");
+              setMessage("");
+            }}
+            style={{
+              display: "block",
+              margin: "22px auto 0",
+              background: "transparent",
+              border: 0,
+              color: "#0a2342",
+              fontWeight: 600,
+              fontSize: 13,
+              cursor: "pointer",
+              fontFamily: "inherit",
+            }}
           >
-            {busy
-              ? "İşleniyor..."
-              : mode === "login"
-                ? "Giriş yap"
-                : "Kayıt ol"}
+            {mode === "login"
+              ? "Hesabınız yok mu? Kayıt olun"
+              : "Zaten hesabınız var mı? Giriş yapın"}
           </button>
-        </form>
+        </section>
 
-        <button
-          type="button"
-          onClick={toggleMode}
-          disabled={busy}
-          className="mt-5 text-sm text-slate-600 underline disabled:opacity-50"
-        >
-          {mode === "login"
-            ? "Hesabın yok mu? Kayıt ol"
-            : "Zaten hesabın var mı? Giriş yap"}
-        </button>
-      </section>
+        <p style={{
+          color: "#a9bed8",
+          textAlign: "center",
+          fontSize: 12,
+          marginTop: 28,
+        }}>
+          Turista Transfer © 2026
+        </p>
+      </div>
     </main>
   );
 }
