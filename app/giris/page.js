@@ -243,6 +243,10 @@ export default function Giris() {
               : "Yeni hesabınızı oluşturun."}
           </p>
 
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 22 }}>
+            <div style={{ padding: 13, border: "2px solid #d4af37", borderRadius: 14, background: "#fffbec", textAlign: "center", color: "#0a2342", fontSize: 13, fontWeight: 750 }}>👤 Müşteri girişi</div>
+            <a href="/turista-partner.html" style={{ padding: 13, border: "1px solid #dce4ed", borderRadius: 14, background: "#f8fafc", textAlign: "center", color: "#0a2342", fontSize: 13, fontWeight: 750, textDecoration: "none" }}>🏢 Acenta / Firma<br/><span style={{ fontSize: 11, fontWeight: 500 }}>Demo panelini aç ↗</span></a>
+          </div>
           <form onSubmit={submit} style={{
             display: "grid",
             gap: 13,
