@@ -210,7 +210,8 @@ function render(){
  const nn=c('new').length;$('nb').style.display=nn?'block':'none';$('nb').textContent=nn;$('bb').style.display=nn?'block':'none';$('bb').textContent=nn;
  const nx=c('ok')[0];$('next').innerHTML=nx?jobCard(nx,1):`<div class="empty">Onaylı transferiniz yok.</div>`;
  const nw=c('new');$('hnew').innerHTML=nw.length?nw.slice(0,2).map(j=>jobCard(j,true)).join(''):`<div class="empty">Yeni talep yok.</div>`;
- // Example historical metrics are illustrative only.\n  const paid=J.filter(j=>j.st=='done'&&j.paid).reduce((a,j)=>a+j.net,0)+9600,hold=J.filter(j=>j.st=='ok'||(j.st=='done'&&!j.paid)).reduce((a,j)=>a+j.net,0);
+ // Example historical metrics are illustrative only.
+  const paid=J.filter(j=>j.st=='done'&&j.paid).reduce((a,j)=>a+j.net,0)+9600,hold=J.filter(j=>j.st=='ok'||(j.st=='done'&&!j.paid)).reduce((a,j)=>a+j.net,0);
  $('em').textContent=fm(paid);$('eh').textContent=fm(hold);
  $('kp').innerHTML=[['📥','Yeni talep',nn],['🗓️','Onaylı transfer',c('ok').length],['✅','Tamamlanan',c('done').length+14],['⭐','Puan','4.9']].map(k=>`<div class="kp"><i>${k[0]}</i><div><b>${k[2]}</b><small>${k[1]}</small></div></div>`).join('');
 }
@@ -291,7 +292,7 @@ function tgCk(t,i){ST.ck[t+i]=!ST.ck[t+i];persist();drawSheet()}
 function sendApp(){ST.sent=1;persist();drawSheet();if(navigator.vibrate)navigator.vibrate([60,40,120])}
 
 showAcc();showAvail();drawNS();render();prog();
-setTimeout(()=>$('splash').classList.add('hide'),2200);
+setTimeout(()=>$('splash').classList.add('hide'),350);
 // Demo: incoming jobs are created by the customer application, not a fabricated timer.
 window.addEventListener('storage',e=>{if(e.key===DEMO_KEY)render()});setInterval(()=>{const v=localStorage.getItem(DEMO_KEY)||'[]';if(v!==window._lastDemoState){window._lastDemoState=v;render()}},1500);
 </script>
