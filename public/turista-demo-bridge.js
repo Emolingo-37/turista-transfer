@@ -36,7 +36,8 @@ window.search=function(){
     if(!item.passengerDetailsReady){
       const names=Array.from({length:Math.min(Number(item.pax)||1,40)},(_,i)=>'<div style="margin:12px 0 16px"><label class="lb">'+(i+1)+'. Yolcu</label><input class="fld demo-name" placeholder="Ad Soyad" autocomplete="off" style="display:block;width:100%"><input class="fld" aria-label="T.C. kimlik numarası önizlemesi" placeholder="T.C. Kimlik No (bu önizlemede gerekli değil)" disabled style="display:block;width:100%;margin-top:7px;background:#f1f5f9"></div>');
       list.insertAdjacentHTML('beforeend','<div class="card" style="margin-top:12px"><h4>Yolcu bilgileri</h4><p style="font-size:12px;color:#64748b">Bu önizlemede gerçek kimlik bilgisi girmeyin.</p>'+names.join('')+'<button class="btn" id="next-payment">Ödemeye geç</button></div>');
-      list.querySelector('#next-payment').onclick=()=>{const n=[...list.querySelectorAll('.demo-name')];if(n.some(x=>x.value.trim().split(/\s+/).length<2)){alert('Her yolcu için örnek ad ve soyad yazın.');return}const a=read(),j=a.find(x=>x.id===ref);if(!j||j.status!=='pending_payment')return;j.passengerDetailsReady=true;write(a);refresh()};
+      // The navigation is delegated below so the action also works after DOM refresh.
+
     }else{
       list.insertAdjacentHTML('beforeend','<div class="card" style="margin-top:12px"><h4>Ödeme</h4><p style="font-size:13px;color:#64748b">Ödeme önizlemesi: Kart bilgisi istemiyoruz, ücret tahsil edilmiyor.</p><button class="btn" id="complete-payment">Öde ve rezervasyonu tamamla</button></div>');
       list.querySelector('#complete-payment').onclick=()=>{const a=read(),j=a.find(x=>x.id===ref);if(!j||j.status!=='pending_payment'||!j.passengerDetailsReady)return;j.status='confirmed';j.confirmedAt=Date.now();write(a);refresh()};
@@ -46,6 +47,21 @@ window.search=function(){
   (item.offers||[]).forEach(v=>{const oid=ref+'-'+v.created+'-'+v.price;if(!seenOffers.has(oid)){seenOffers.add(oid);announce('Transferiniz için yeni bir fiyat teklifi geldi.')}});
   if(accepted&&item.status==='driver_assigned')announce('Şoför bilgileri hazır.');
  }
+ const advancePayment=e=>{
+  const b=e.target.closest?.('#next-payment,#complete-payment');
+  if(!b||!c.contains(b))return;
+  e.preventDefault();e.stopImmediatePropagation();
+  const all=read(),j=all.find(x=>x.id===ref);
+  if(!j||j.status!=='pending_payment')return;
+  if(b.id==='next-payment'){
+    j.passengerDetailsReady=true;
+    j.passengerCountVerified=Number(j.pax)||1;
+    write(all);refresh();
+  }else if(j.passengerDetailsReady){
+    j.status='confirmed';j.confirmedAt=Date.now();write(all);refresh();
+  }
+ };
+ c.addEventListener('click',advancePayment,true);
  refresh();clearInterval(timer);timer=setInterval(refresh,1000);window.addEventListener('storage',refresh);window.addEventListener(EVENT,refresh);
 };
 })();
