@@ -21,37 +21,58 @@ export default function Giris() {
 
   async function submit(e) {
     e.preventDefault();
+
     if (busy) return;
 
     setBusy(true);
     setMsg("");
 
+    console.log("[LOGIN DEBUG] Form gönderildi", {
+      mode,
+      email: f.email.trim(),
+    });
+
     try {
       if (mode === "login") {
+        console.log("[LOGIN DEBUG] Supabase giriş isteği gönderiliyor");
+
         const { data, error } =
           await supabase.auth.signInWithPassword({
             email: f.email.trim(),
             password: f.password,
           });
 
+        console.log("[LOGIN DEBUG] Supabase yanıtı", {
+          hasUser: !!data?.user,
+          hasSession: !!data?.session,
+          error: error?.message ?? null,
+        });
+
         if (error) {
-          console.error("Supabase giriş hatası:", error);
+          console.error("[LOGIN DEBUG] Giriş hatası:", error);
           setMsg("Giriş hatası: " + error.message);
           return;
         }
 
-        if (!data.session) {
-          setMsg("Giriş yapıldı ancak oturum bulunamadı. Tekrar deneyin.");
+        if (!data?.session) {
+          console.error("[LOGIN DEBUG] Oturum oluşturulmadı");
+          setMsg(
+            "Giriş yanıtı alındı ancak oturum bulunamadı. Tekrar deneyin."
+          );
           return;
         }
-console.log("GİRİŞ BAŞARILI", {
-  hasSession: !!data.session,
-  userId: data.user?.id,
-  expiresAt: data.session?.expires_at,
-});
+
+        console.log("[LOGIN DEBUG] Giriş başarılı", {
+          hasSession: !!data.session,
+          userId: data.user?.id,
+          expiresAt: data.session?.expires_at,
+        });
+
         window.location.assign("/app.html");
         return;
       }
+
+      console.log("[REGISTER DEBUG] Kayıt isteği gönderiliyor");
 
       const { data, error } = await supabase.auth.signUp({
         email: f.email.trim(),
@@ -64,13 +85,19 @@ console.log("GİRİŞ BAŞARILI", {
         },
       });
 
+      console.log("[REGISTER DEBUG] Supabase yanıtı", {
+        hasUser: !!data?.user,
+        hasSession: !!data?.session,
+        error: error?.message ?? null,
+      });
+
       if (error) {
-        console.error("Supabase kayıt hatası:", error);
+        console.error("[REGISTER DEBUG] Kayıt hatası:", error);
         setMsg("Kayıt hatası: " + error.message);
         return;
       }
 
-      if (!data.session) {
+      if (!data?.session) {
         setMsg(
           "Kayıt alındı. E-posta doğrulaması gerekiyorsa gelen kutunu kontrol et."
         );
@@ -78,11 +105,13 @@ console.log("GİRİŞ BAŞARILI", {
       }
 
       window.location.assign("/app.html");
+      return;
     } catch (err) {
-      console.error("Giriş/kayıt hatası:", err);
-      setMsg("Beklenmeyen hata: " + (err.message || String(err)));
+      console.error("[AUTH DEBUG] Beklenmeyen hata:", err);
+      setMsg("Beklenmeyen hata: " + (err?.message || String(err)));
     } finally {
       setBusy(false);
+      console.log("[AUTH DEBUG] İşlem tamamlandı");
     }
   }
 
@@ -98,14 +127,17 @@ console.log("GİRİŞ BAŞARILI", {
             <>
               <input
                 className="field"
+                name="full_name"
                 placeholder="Ad soyad"
                 autoComplete="name"
                 required
                 value={f.full_name}
                 onChange={set("full_name")}
               />
+
               <input
                 className="field"
+                name="phone"
                 placeholder="Telefon (05xx xxx xx xx)"
                 type="tel"
                 autoComplete="tel"
@@ -118,6 +150,7 @@ console.log("GİRİŞ BAŞARILI", {
 
           <input
             className="field"
+            name="email"
             type="email"
             placeholder="E-posta"
             autoComplete="email"
@@ -128,6 +161,7 @@ console.log("GİRİŞ BAŞARILI", {
 
           <input
             className="field"
+            name="password"
             type="password"
             placeholder="Şifre (en az 6 karakter)"
             autoComplete={
@@ -160,7 +194,9 @@ console.log("GİRİŞ BAŞARILI", {
         <button
           type="button"
           onClick={() => {
-            setMode((prev) => (prev === "login" ? "register" : "login"));
+            setMode((prev) =>
+              prev === "login" ? "register" : "login"
+            );
             setMsg("");
           }}
           className="mt-5 text-sm text-slate-600 underline"
