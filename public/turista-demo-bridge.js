@@ -12,7 +12,7 @@ window.search=function(){
  write([d,...read()]);
  active=ref;
  step(2);
- const c=add('<h4>🧭 Demo: Firmalardan teklif bekleniyor</h4><div id="demo-msg" style="line-height:1.6;font-size:14px;color:#64748b">Talebiniz Turista Partner paneline iletildi. Partner panelini ikinci sekmede açıp teklif gönderebilirsiniz.</div><div id="demo-offers" style="margin-top:12px"></div><a href="/partner-demo.html" target="_blank" rel="noopener" style="display:inline-block;margin-top:12px;color:#13315c;font-weight:700">↗ Turista Partner demosunu aç</a><button class="btn alt" id="demo-cancel">Demo talebini iptal et</button>','card');
+ const c=add('<h4>🧭 Demo: Firmalardan teklif bekleniyor</h4><div id="demo-msg" style="line-height:1.6;font-size:14px;color:#64748b">Talebiniz Turista Partner paneline iletildi. Partner panelini ikinci sekmede açıp teklif gönderebilirsiniz.</div><div id="demo-offers" style="margin-top:12px"></div><a href="/turista-partner.html" target="_blank" rel="noopener" style="display:inline-block;margin-top:12px;color:#13315c;font-weight:700">↗ Turista Partner demosunu aç</a><button class="btn alt" id="demo-cancel">Demo talebini iptal et</button>','card');
  c.querySelector('#demo-cancel').onclick=()=>{const r=read(),j=r.find(x=>x.id===ref);if(j&&j.status==='new'){j.status='cancelled';write(r)}active=null;clearInterval(timer);c.querySelector('#demo-msg').textContent='Demo talebi iptal edildi.'};
  function refresh(){
   const j=read().find(x=>x.id===ref);if(!j||!c.isConnected)return;
