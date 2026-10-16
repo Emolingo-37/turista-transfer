@@ -1,73 +1,171 @@
+
 "use client";
+
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 export default function Giris() {
   const [mode, setMode] = useState("login");
-  const [f, setF] = useState({ full_name: "", phone: "", email: "", password: "" });
+  const [f, setF] = useState({
+    full_name: "",
+    phone: "",
+    email: "",
+    password: "",
+  });
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
-  const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
 
- 
-async function submit(e) {
-  e.preventDefault();
-  setBusy(true);
-  setMsg("");
+  const set = (key) => (e) => {
+    setF((prev) => ({ ...prev, [key]: e.target.value }));
+  };
 
-  try {
-    if (mode === "login") {
-      const { data, error } =
-        await supabase.auth.signInWithPassword({
-          email: f.email.trim(),
-          password: f.password,
-        });
+  async function submit(e) {
+    e.preventDefault();
+    if (busy) return;
+
+    setBusy(true);
+    setMsg("");
+
+    try {
+      if (mode === "login") {
+        const { data, error } =
+          await supabase.auth.signInWithPassword({
+            email: f.email.trim(),
+            password: f.password,
+          });
+
+        if (error) {
+          console.error("Supabase giriş hatası:", error);
+          setMsg("Giriş hatası: " + error.message);
+          return;
+        }
+
+        if (!data.session) {
+          setMsg("Giriş yapıldı ancak oturum bulunamadı. Tekrar deneyin.");
+          return;
+        }
+
+        window.location.assign("/app.html");
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signUp({
+        email: f.email.trim(),
+        password: f.password,
+        options: {
+          data: {
+            full_name: f.full_name.trim(),
+            phone: f.phone.trim(),
+          },
+        },
+      });
 
       if (error) {
-        console.error("Supabase giriş hatası:", error);
-        setMsg("Giriş hatası: " + error.message);
+        console.error("Supabase kayıt hatası:", error);
+        setMsg("Kayıt hatası: " + error.message);
         return;
       }
 
       if (!data.session) {
-        setMsg("Giriş yanıtı geldi ancak oturum oluşturulmadı.");
+        setMsg(
+          "Kayıt alındı. E-posta doğrulaması gerekiyorsa gelen kutunu kontrol et."
+        );
         return;
       }
 
-      window.location.href = "/app.html";
-      return;
+      window.location.assign("/app.html");
+    } catch (err) {
+      console.error("Giriş/kayıt hatası:", err);
+      setMsg("Beklenmeyen hata: " + (err.message || String(err)));
+    } finally {
+      setBusy(false);
     }
-
-    const { data, error } = await supabase.auth.signUp({
-      email: f.email.trim(),
-      password: f.password,
-      options: {
-        data: {
-          full_name: f.full_name,
-          phone: f.phone,
-        },
-      },
-    });
-
-    if (error) {
-      setMsg("Kayıt hatası: " + error.message);
-      return;
-    }
-
-    if (!data.session) {
-      setMsg(
-        "Kayıt alındı. E-postanı doğrulaman gerekebilir."
-      );
-      return;
-    }
-
-        window.location.href = "/app.html";
-    return;
   }
-} catch (err) {
-    console.error("Beklenmeyen giriş hatası:", err);
-    setMsg("Beklenmeyen hata: " + (err.message || String(err)));
-  } finally {
-    setBusy(false);
-  }
+
+  return (
+    <div className="mx-auto max-w-md px-5 py-16">
+      <div className="rounded-3xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
+        <h1 className="font-display text-3xl font-bold">
+          {mode === "login" ? "Giriş yap" : "Hesap oluştur"}
+        </h1>
+
+        <form onSubmit={submit} className="mt-6 space-y-3">
+          {mode === "register" && (
+            <>
+              <input
+                className="field"
+                placeholder="Ad soyad"
+                autoComplete="name"
+                required
+                value={f.full_name}
+                onChange={set("full_name")}
+              />
+              <input
+                className="field"
+                placeholder="Telefon (05xx xxx xx xx)"
+                type="tel"
+                autoComplete="tel"
+                required
+                value={f.phone}
+                onChange={set("phone")}
+              />
+            </>
+          )}
+
+          <input
+            className="field"
+            type="email"
+            placeholder="E-posta"
+            autoComplete="email"
+            required
+            value={f.email}
+            onChange={set("email")}
+          />
+
+          <input
+            className="field"
+            type="password"
+            placeholder="Şifre (en az 6 karakter)"
+            autoComplete={
+              mode === "login" ? "current-password" : "new-password"
+            }
+            minLength={6}
+            required
+            value={f.password}
+            onChange={set("password")}
+          />
+
+          {msg && (
+            <p
+              role="alert"
+              className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900"
+            >
+              {msg}
+            </p>
+          )}
+
+          <button className="btn w-full" type="submit" disabled={busy}>
+            {busy
+              ? "Bekleyin..."
+              : mode === "login"
+                ? "Giriş yap"
+                : "Kayıt ol"}
+          </button>
+        </form>
+
+        <button
+          type="button"
+          onClick={() => {
+            setMode((prev) => (prev === "login" ? "register" : "login"));
+            setMsg("");
+          }}
+          className="mt-5 text-sm text-slate-600 underline"
+        >
+          {mode === "login"
+            ? "Hesabın yok mu? Kayıt ol"
+            : "Zaten hesabın var mı? Giriş yap"}
+        </button>
+      </div>
+    </div>
+  );
 }
