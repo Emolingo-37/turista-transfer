@@ -204,7 +204,7 @@ function jobCard(j,ro){
  </div>`}
 
  const act=ro?'':j.st=='new'?`<div class="two"><button class="btn alt" onclick="decline(${j.id})">Reddet</button><button class="btn" onclick="accept(${j.id})">Kabul et</button></div>`
- :j.st=='ok'?(j.sent?`<div class="shield" style="background:#f0fdf4;border-color:#bbf7d0;color:#15803d">✓ Şoför bilgisi müşteriye SMS ile iletildi: ${esc(j.dr)} · ${esc(j.pl)}</div><button class="btn" onclick="finish(${j.id})">Transferi tamamla</button>`
+ :j.st=='ok'?(j.sent?`<div class="shield" style="background:#f0fdf4;border-color:#bbf7d0;color:#15803d">✓ Şoför bilgileri kaydedildi (SMS gönderilmedi): ${esc(j.dr)} · ${esc(j.pl)}</div><button class="btn" onclick="finish(${j.id})">Transferi tamamla</button>`
  :`<label class="lb">Şoför adı</label><input class="fld" id="dr${j.id}" placeholder="Ad Soyad"><label class="lb">Plaka</label><input class="fld" id="pl${j.id}" placeholder="34 ABC 123"><button class="btn" onclick="sendDrv(${j.id})">Şoför bilgisini ilet</button>`)
  :`<div class="shield" style="background:${j.paid?'#f0fdf4':'#fffbeb'}">${j.paid?'✓ Ödeme hesabınıza aktarıldı':'⏳ Ödeme 24 saat içinde hesabınıza aktarılır'}</div>`;
  const tg=j.st=='new'?'<span class="tag g">Yeni talep</span>':j.st=='ok'?'<span class="tag good">Onaylandı</span>':'<span class="tag">Tamamlandı</span>';
@@ -225,14 +225,14 @@ function render(force=false){
  const nx=c('ok')[0];$('next').innerHTML=nx?jobCard(nx,1):`<div class="empty">Onaylı transferiniz yok.</div>`;
  const nw=c('new');$('hnew').innerHTML=nw.length?nw.slice(0,2).map(j=>jobCard(j,true)).join(''):`<div class="empty">Yeni talep yok.</div>`;
  // Example historical metrics are illustrative only.
-  const paid=J.filter(j=>j.st=='done'&&j.paid).reduce((a,j)=>a+j.net,0)+9600,hold=J.filter(j=>j.st=='ok'||(j.st=='done'&&!j.paid)).reduce((a,j)=>a+j.net,0);
+  const paid=J.filter(j=>j.st=='done'&&j.paid).reduce((a,j)=>a+j.net,0),hold=J.filter(j=>j.st=='ok'||(j.st=='done'&&!j.paid)).reduce((a,j)=>a+j.net,0);
  $('em').textContent=fm(paid);$('eh').textContent=fm(hold);
- $('kp').innerHTML=[['📥','Yeni talep',nn],['🗓️','Onaylı transfer',c('ok').length],['✅','Tamamlanan',c('done').length+14],['⭐','Puan','4.9']].map(k=>`<div class="kp"><i>${k[0]}</i><div><b>${k[2]}</b><small>${k[1]}</small></div></div>`).join('');
+ $('kp').innerHTML=[['📥','Yeni talep',nn],['🗓️','Onaylı transfer',c('ok').length],['✅','Tamamlanan',c('done').length],['⭐','Puan','4.9']].map(k=>`<div class="kp"><i>${k[0]}</i><div><b>${k[2]}</b><small>${k[1]}</small></div></div>`).join('');
 }
 function accept(id){J.find(j=>j.id==id).st='ok';render();toast('Kabul edildi · Şoför bilgisini iletin')}
 function decline(id){J=J.filter(j=>j.id!=id);render();toast('Talep reddedildi')}
 function sendDrv(id){const d=$('dr'+id),p=$('pl'+id);let bad=0;[d,p].forEach(e=>{const x=e.value.trim().length<3;e.style.borderColor=x?'#ef4444':'';bad|=x});if(bad)return;
- const j=J.find(j=>j.id==id);j.dr=d.value.trim();j.pl=p.value.trim().toUpperCase();j.sent=1;render();toast('SMS müşteriye gönderildi ✓')}
+ const j=J.find(j=>j.id==id);j.dr=d.value.trim();j.pl=p.value.trim().toUpperCase();j.sent=1;render();toast('Şoför bilgileri kaydedildi · SMS gönderilmedi')}
 function finish(id){const j=J.find(j=>j.id==id);j.st='done';j.paid=0;tab='done';render();toast('Transfer tamamlandı')}
 const bars=[['Pzt',40],['Sal',64],['Çar',30],['Per',80],['Cum',56],['Cmt',100],['Paz',44]];
 $('bars').innerHTML=bars.map(b=>`<div><i style="height:${b[1]*.7}%"></i>${b[0]}</div>`).join('');
