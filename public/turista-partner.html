@@ -205,12 +205,12 @@ function jobCard(j,ro){
  ${j.st=='new'?'<div class="shield">🛡️ Müşteri ödemesi Turista güvencesinde. Net ücret komisyon sonrası tutardır.</div>':''}${act}</div>`}
 function render(){
  const c=s=>combined().filter(j=>j.st==s);
- $('jl').innerHTML=c(tab).map(jobCard).join('')||`<div class="empty"><b>${tab=='new'?'🔔':tab=='ok'?'🗓️':'🏁'}</b>${tab=='new'?'Şu an yeni talep yok. Müsait olduğunuzda talepler burada görünür.':tab=='ok'?'Onaylı transferiniz yok. Yeni taleplerden kabul edebilirsiniz.':'Henüz tamamlanan transfer yok.'}</div>`;
+ $('jl').innerHTML=c(tab).map(j=>jobCard(j,false)).join('')||`<div class="empty"><b>${tab=='new'?'🔔':tab=='ok'?'🗓️':'🏁'}</b>${tab=='new'?'Şu an yeni talep yok. Müsait olduğunuzda talepler burada görünür.':tab=='ok'?'Onaylı transferiniz yok. Yeni taleplerden kabul edebilirsiniz.':'Henüz tamamlanan transfer yok.'}</div>`;
  document.querySelectorAll('#seg button').forEach(b=>{b.classList.toggle('on',b.dataset.s==tab);const n=c(b.dataset.s).length;b.textContent={new:'Yeni',ok:'Onaylı',done:'Tamamlanan'}[b.dataset.s]+(n?' ('+n+')':'')});
  const nn=c('new').length;$('nb').style.display=nn?'block':'none';$('nb').textContent=nn;$('bb').style.display=nn?'block':'none';$('bb').textContent=nn;
  const nx=c('ok')[0];$('next').innerHTML=nx?jobCard(nx,1):`<div class="empty">Onaylı transferiniz yok.</div>`;
- const nw=c('new');$('hnew').innerHTML=nw.length?nw.slice(0,2).map(jobCard).join(''):`<div class="empty">Yeni talep yok.</div>`;
- const paid=J.filter(j=>j.st=='done'&&j.paid).reduce((a,j)=>a+j.net,0)+9600,hold=J.filter(j=>j.st=='ok'||(j.st=='done'&&!j.paid)).reduce((a,j)=>a+j.net,0);
+ const nw=c('new');$('hnew').innerHTML=nw.length?nw.slice(0,2).map(j=>jobCard(j,true)).join(''):`<div class="empty">Yeni talep yok.</div>`;
+ // Example historical metrics are illustrative only.\n  const paid=J.filter(j=>j.st=='done'&&j.paid).reduce((a,j)=>a+j.net,0)+9600,hold=J.filter(j=>j.st=='ok'||(j.st=='done'&&!j.paid)).reduce((a,j)=>a+j.net,0);
  $('em').textContent=fm(paid);$('eh').textContent=fm(hold);
  $('kp').innerHTML=[['📥','Yeni talep',nn],['🗓️','Onaylı transfer',c('ok').length],['✅','Tamamlanan',c('done').length+14],['⭐','Puan','4.9']].map(k=>`<div class="kp"><i>${k[0]}</i><div><b>${k[2]}</b><small>${k[1]}</small></div></div>`).join('');
 }
