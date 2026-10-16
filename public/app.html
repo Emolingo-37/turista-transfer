@@ -192,6 +192,71 @@ footer{padding-left:max(20px,calc((100% - 780px)/2));padding-right:max(20px,calc
 #routes .big{flex-basis:240px;width:240px;height:190px}
 #places{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 }
+
+/* Turista refined responsive interface */
+:root{color-scheme:light;--ease-apple:cubic-bezier(.22,1,.36,1)}
+html{scroll-behavior:smooth}
+body{background:#f4f6fa}
+button,.pc,.big,.li{-webkit-tap-highlight-color:transparent}
+button:focus-visible,.pc:focus-visible,.big:focus-visible,select:focus-visible{outline:3px solid #d4af37;outline-offset:3px}
+.view{overscroll-behavior-y:contain;scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent}
+.view.on{animation:turista-appear .26s var(--ease-apple) both}
+@keyframes turista-appear{from{opacity:.45;transform:translate3d(0,7px,0)}to{opacity:1;transform:translateZ(0)}}
+nav button{transition:background-color .18s ease,color .18s ease,transform .18s ease}
+nav button:active,.pill:active,.pc:active,.big:active{transform:scale(.985)}
+.hero,.tl,.prof,.lst{box-shadow:0 5px 28px #102c4a0b}
+.hero{border-radius:28px}
+#routes .big,#homeplaces .pc,.pl{transform:translateZ(0)}
+.turista-lang{background:#ffffff16;border:1px solid #ffffff38;border-radius:12px;color:#fff;padding:8px 12px;font:600 13px inherit;cursor:pointer}
+.turista-lang option{color:#0a2342;background:#fff}
+.lang-account{border:0;background:transparent;color:var(--p);font:600 14px inherit;padding:6px 2px;cursor:pointer}
+@media(min-width:1024px){
+.app{width:100%;min-height:100dvh}
+nav{width:238px;padding:22px 14px;gap:6px}
+nav button{border-radius:13px;padding:12px 14px}
+.brand{padding-bottom:20px}
+#chatv{left:238px}
+.view{padding:30px clamp(24px,3.6vw,68px) 42px}
+#v-home.on{grid-template-columns:minmax(0,1.75fr) minmax(290px,.95fr);column-gap:clamp(20px,2.4vw,38px);row-gap:0;align-content:start}
+#v-home>.hero{padding:30px clamp(24px,2.4vw,40px);margin-top:16px;min-height:205px}
+#v-home>.hero b{font-size:clamp(28px,2.4vw,39px)}
+#v-home>.hero p{margin:9px 0 16px;font-size:14px}
+#v-home>.sec{margin-top:22px}
+#v-home>:nth-child(6){margin-top:18px}
+#v-home>.tl{margin-top:58px!important;padding:16px 18px;box-shadow:0 5px 22px #102c4a08}
+#v-home .ts{padding:6px 0;gap:11px}
+#v-home .ts em{width:36px;height:36px;border-radius:12px}
+#v-home .tl:before{left:35px}
+#routes{gap:11px}
+#routes .big{height:174px;padding:12px;border-radius:21px}
+#routes .service-copy strong{font-size:13px}
+#homeplaces{gap:12px}
+#homeplaces .pc .im{height:118px}
+#homeplaces .pc>div:last-child{padding:10px 11px 12px;font-size:12.5px}
+#places{grid-template-columns:repeat(3,minmax(0,1fr))}
+#v-home>:nth-child(8){grid-column:1/-1}
+#v-home>:nth-child(9){grid-column:1/-1}
+}
+@media(min-width:1024px) and (max-width:1320px){
+#routes{grid-template-columns:repeat(4,minmax(0,1fr))}
+#routes .big{height:168px}
+}
+@media(min-width:1450px){
+#v-home.on{grid-template-columns:minmax(0,1.75fr) minmax(290px,.92fr)}
+#routes .big{height:184px}
+#homeplaces .pc .im{height:136px}
+}
+@media(max-width:1023px){
+.app{max-height:none}
+.view{padding-bottom:calc(104px + env(safe-area-inset-bottom))}
+.hero{margin-top:15px;padding:24px 19px}
+.hero b{font-size:clamp(29px,8vw,36px)}
+#routes .big{transition:transform .18s var(--ease-apple)}
+nav{background:#fffffff0;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
+.lang-nav{display:none!important}
+}
+@media(prefers-reduced-motion:reduce){.view.on{animation:none!important}*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
 </style>
 </head>
 <body>
@@ -228,7 +293,7 @@ footer{padding-left:max(20px,calc((100% - 780px)/2));padding-right:max(20px,calc
   <div class="lst">
     <div class="li"><em>🔔</em><span>Bildirimler</span><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
     <div class="li"><em>💬</em><span>SMS ile bilgilendirme</span><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
-    <div class="li"><em>🌐</em><span>Dil</span><small>Türkçe</small></div>
+    <div class="li"><em>🌐</em><span>Dil</span><select class="lang-account" id="language-account" aria-label="Dil / Language" onchange="turistaSetLanguage(this.value)"><option value="tr">Türkçe</option><option value="en">English</option></select></div>
     <div class="li"><em>💳</em><span>Ödeme yöntemleri</span><small>›</small></div>
   </div>
   <div class="sec">Destek</div>
@@ -243,7 +308,7 @@ footer{padding-left:max(20px,calc((100% - 780px)/2));padding-right:max(20px,calc
   </div></div>
 </section>
 
-<nav><div class="brand"><div class="lg2">T</div><div><b>Turista Transfer</b><small>Güvenli transferin adresi</small></div></div><button class="on" data-t="home"><b>🏠</b>Ana Menü</button><button data-t="places"><b>🗺️</b>Turistik Yerler</button><button data-t="acc"><b>👤</b>Hesap</button><div class="usr" onclick="document.querySelector('nav button[data-t=acc]').click()"><div class="av" id="sav">M</div><div><b id="sn">Misafir</b><small id="sm">Hesabı düzenle</small></div></div></nav>
+<nav><div class="brand"><div class="lg2">T</div><div><b>Turista Transfer</b><small>Güvenli transferin adresi</small></div></div><button class="on" data-t="home"><b>🏠</b>Ana Menü</button><button data-t="places"><b>🗺️</b>Turistik Yerler</button><button data-t="acc"><b>👤</b>Hesap</button><div class="lang-nav" style="padding:8px 11px;margin-top:auto"><select class="turista-lang" id="language-nav" aria-label="Language" onchange="turistaSetLanguage(this.value)"><option value="tr">🇹🇷 Türkçe</option><option value="en">🇬🇧 English</option></select></div><div class="usr" style="margin-top:0" onclick="document.querySelector('nav button[data-t=acc]').click()"><div class="av" id="sav">M</div><div><b id="sn">Misafir</b><small id="sm">Hesabı düzenle</small></div></div></nav>
 
 <div id="chatv">
   <div class="ch"><div class="t"><button onclick="closeChat()">‹</button><div><b>Turista Asistan</b><small>Ödemeniz güvencemizde</small></div></div>
@@ -309,7 +374,7 @@ function showAcc(){$('f-n').value=A.n||'';$('f-p').value=A.p||'';$('f-e').value=
  $('sn').textContent=A.n||'Misafir';$('sm').textContent=A.e||A.p||'Hesabı düzenle';$('sav').textContent=(A.n||'M')[0].toUpperCase()}
 function saveAcc(){A={n:$('f-n').value.trim(),p:$('f-p').value.trim(),e:$('f-e').value.trim()};if(UID)SB.from('profiles').update({full_name:A.n,phone:A.p}).eq('id',UID).then(r=>{if(r.error)alert('Kaydedilemedi: '+r.error.message)});showAcc();$('sv').textContent='✓ Kaydedildi';setTimeout(()=>$('sv').textContent='Kaydet',1500)}
 const PH=['Havalimanından otele 4 kişiyiz…','Ailemle Kapadokya’ya gitmek istiyoruz…','12 kişilik grubumuz Sapanca’ya…','Yarın 09:00 Taksim’e, 3 bavulumuz var…'];let pi=0;setInterval(()=>{const e=$('pt');if(!e)return;e.style.opacity=0;setTimeout(()=>{pi=(pi+1)%PH.length;e.textContent=PH[pi];e.style.opacity=1},350)},2800);$('pt').textContent=PH[0];
-showAcc();setTimeout(()=>$('splash').classList.add('hide'),2200);
+showAcc();setTimeout(()=>$('splash').classList.add('hide'),650);
 
 /* ---- Chat ---- */
 const chat=$('chat'),inp=$('inp');let T={},mode='free',notify=false,pax=2,lug=2,way='Tek yön',extras=new Set();
@@ -421,5 +486,78 @@ $('send').onclick=()=>submit();inp.onkeydown=e=>{if(e.key==='Enter')submit()};
 <script src="/turista-asistan-v2.js"></script>
 <script src="/turista-ux.js"></script>
 <script src="/turista-konum.js"></script>
+<script>
+/* Interface translation. Original Turkish text is retained for reversible switching. */
+(function(){
+const dictionary={
+'Güvenli transferin adresi':'Travel with confidence','Ana Menü':'Home','Turistik Yerler':'Explore','Hesap':'Account','Misafir':'Guest','Hesabı düzenle':'Edit account','Merhaba 👋':'Hello 👋',
+'Transferinizi birlikte güvenle ayarlayalım.':"Let's plan your transfer with confidence.",
+'Nereye gidiyoruz? ✨':'Where are we going? ✨',
+'Nereye, kaç kişi, ne zaman? Kendi cümlelerinizle yazın; aracı biz bulalım, ödemeniz transfer bitene kadar güvencemizde.':"Where, how many passengers, and when? Tell us in your own words. We'll find the vehicle.",
+'Ne yapmak istiyorsunuz?':'What would you like to do?','Nasıl çalışır?':'How it works','Seyahatinizi yazın':'Tell us about your trip',
+'Kaç kişi, bavul, ek istek… Sohbet edin, formu biz dolduralım.':'Passengers, luggage and requests. Chat with us and we will fill in the form.',
+'Aracı biz bulalım':'We find your vehicle','Doğrulanmış firmalarda uygun aracı ararız, bulununca bildirim alırsınız.':'We check partner companies and notify you when a vehicle is found.',
+'Yolcu bilgileri ve ödeme':'Passenger details & payment','Yolcu bilgilerini girin, ödemeniz transfer bitene kadar güvencemizde kalır.':'Enter your details and proceed to payment.',
+'Şoför bilgisi SMS’le gelir':'Driver details by SMS','Ödeme sonrası şoför ve plaka bilgisi telefonunuza iletilir.':'Driver and plate details are sent to your phone.',
+'Keşfedilecek yerler':'Places to explore','Gezmeye değer güzellikler. Beğendiğiniz yere transfer ayarlayın.':'Discover beautiful destinations and arrange your transfer.',
+'Havalimanından otele':'Airport to hotel','Aile transferi':'Family transfer','Grup transferi':'Group transfer','Kapadokya gezisi':'Cappadocia tour',
+'Terminal karşılama ve özel transfer':'Airport pickup and private transfer','Ailece rahat ve güvenli yolculuk':'Comfortable family journeys',
+'Kalabalık gruplara uygun araçlar':'Vehicles for larger groups','Özel rota ve gezi transferi':'Custom tours and transfers',
+'Ayasofya':'Hagia Sophia','Kapadokya':'Cappadocia','Efes Antik Kenti':'Ephesus Ancient City','Sapanca Gölü':'Lake Sapanca',
+'İstanbul':'Istanbul','İzmir':'Izmir','Nevşehir':'Nevsehir',
+'Buraya transfer ayarla':'Book a transfer here','Bilgilerinizi ekleyin':'Add your details','Hesap Bilgileri':'Account details','Kaydet':'Save',
+'Ayarlar':'Settings','Bildirimler':'Notifications','SMS ile bilgilendirme':'SMS updates','Dil':'Language','Ödeme yöntemleri':'Payment methods','Destek':'Support',
+'Rezervasyonlarım':'My bookings','Turista Güvence Programı':'Turista Protection Program','Yardım ve iletişim':'Help & contact','Gizlilik ve kullanım şartları':'Privacy & terms',
+'Çıkış yap':'Log out','Ödemeniz güvencemizde':'Your payment is protected','1 · Transfer Detayı':'1 · Trip details','2 · Araç Aranıyor':'2 · Finding a vehicle',
+'3 · Yolcu & Ödeme':'3 · Passenger & payment','Transfer Detayı':'Trip details','Nereden':'From','Nereye':'To','Tarih':'Date','Saat':'Time',
+'👥 Yolcu':'👥 Passengers','🧳 Bavul':'🧳 Luggage','Ek istekler':'Extra requests','Tek yön':'One way','Gidiş-dönüş':'Round trip',
+'Uygun Aracı Ara':'Find a vehicle','Uçuş numarası (rötar takibi için)':'Flight number (for delay tracking)','Firma':'Company',
+'Kapasite':'Capacity','Puan':'Rating','Toplam Ücret':'Total price','Kabul Et':'Accept','Başka Araç Ara':'Find another vehicle',
+'Yolcu Bilgileri':'Passenger details','İletişim telefonu (şoför SMS’i için)':'Phone number (for driver SMS)','Ödemeye Geç':'Continue to payment',
+'Güvenli Ödeme (demo)':'Secure payment (demo)','Araç':'Vehicle','Rota':'Route','Transfer':'Transfer','Toplam':'Total',
+'Rezervasyon Alındı':'Booking received','İşleniyor…':'Processing…','Tekrar dene':'Try again','Müsait araçlar kontrol ediliyor…':'Checking vehicle availability…',
+'Size uygun araç aranıyor':'Finding a vehicle for you','Firmalar taranıyor…':'Checking partners…','Güvenle Öde':'Pay securely',
+'Başka araç arayın':'Find another vehicle','Ad Soyad':'Full name','Telefon':'Phone','E-posta':'Email',
+'Konuşmayı başlat…':'Start a conversation…','Havalimanından otele 4 kişiyiz…':'Airport to hotel for four people…',
+'Ailemle Kapadokya’ya gitmek istiyoruz…':'I want to visit Cappadocia with my family…',
+'12 kişilik grubumuz Sapanca’ya…':'Our group of 12 is going to Sapanca…',
+'Yarın 09:00 Taksim’e, 3 bavulumuz var…':'Tomorrow at 9 to Taksim, with 3 bags…',
+'Konuşmayı başlat':'Start chatting',
+};
+const placeholders={'Ad Soyad':'Full name','Telefon':'Phone','E-posta':'Email','Kalkış noktası':'Pickup location','Varış noktası':'Destination','Seyahatinizi yazın…':'Describe your trip…',
+'Kart üzerindeki isim':'Name on card','Kart numarası':'Card number','AA/YY':'MM/YY','örn. TK1234':'e.g. TK1234','05xx xxx xx xx':'Phone number'};
+const originalText=new WeakMap(),originalPlaceholder=new WeakMap();
+let locale='tr',queued=false,applying=false;
+function translate(root){
+ if(applying)return;applying=true;
+ try{
+ const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+ const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
+ for(const n of nodes){if(n.parentElement&&['SCRIPT','STYLE','OPTION'].includes(n.parentElement.tagName))continue;
+ if(!originalText.has(n))originalText.set(n,n.nodeValue);
+ const source=originalText.get(n),trim=source.trim();
+ let dest=locale==='en'?(dictionary[trim]||(/^(Merhaba, )/.test(trim)?trim.replace(/^Merhaba, /,'Hello, '):null)):null;
+ if(locale==='en'&&dest){const i=source.indexOf(trim);dest=source.slice(0,i)+dest+source.slice(i+trim.length);if(n.nodeValue!==dest)n.nodeValue=dest}
+ else if(n.nodeValue!==source)n.nodeValue=source;
+ }
+ root.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el=>{
+ if(!originalPlaceholder.has(el))originalPlaceholder.set(el,el.getAttribute('placeholder'));
+ const orig=originalPlaceholder.get(el);const wanted=locale==='en'?(placeholders[orig]||orig):orig;
+ if(el.placeholder!==wanted)el.placeholder=wanted;
+ });
+ document.documentElement.lang=locale;
+ for(const id of ['language-nav','language-account']){const el=document.getElementById(id);if(el&&el.value!==locale)el.value=locale}
+ }finally{applying=false}
+}
+window.turistaSetLanguage=function(lang){
+ locale=lang==='en'?'en':'tr';try{localStorage.setItem('turista-language',locale)}catch(e){}
+ translate(document.body);
+};
+try{locale=localStorage.getItem('turista-language')==='en'?'en':'tr'}catch(e){}
+const observer=new MutationObserver(()=>{if(applying||queued)return;queued=true;requestAnimationFrame(()=>{queued=false;translate(document.body)})});
+observer.observe(document.body,{subtree:true,childList:true,characterData:true});
+translate(document.body);
+})();
+</script>
 </body>
 </html>
