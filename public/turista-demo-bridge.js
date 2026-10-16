@@ -17,8 +17,10 @@ window.search=function(){
  c.querySelector('#offer-notify').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle()}};
  c.querySelector('#offer-cancel').onclick=()=>{const a=read(),item=a.find(x=>x.id===ref);if(item&&item.status==='new'){item.status='cancelled';write(a);refresh()}};
  const announce=(message)=>{if(!notifications)return;if('Notification'in window&&Notification.permission==='granted'&&!document.hasFocus()){try{new Notification('Turista Transfer',{body:message})}catch(e){}}};
+ let previousState='';
  function refresh(){
   const item=read().find(x=>x.id===ref);if(!item||!c.isConnected){clearInterval(timer);return}
+  const stateKey=JSON.stringify(item);if(stateKey===previousState)return;previousState=stateKey;
   const title=c.querySelector('#offer-title'),info=c.querySelector('#offer-info'),list=c.querySelector('#offer-list'),cancel=c.querySelector('#offer-cancel');
   const accepted=['pending_payment','confirmed','driver_assigned','completed'].includes(item.status);const paid=['confirmed','driver_assigned','completed'].includes(item.status);
   const done=item.status==='completed';
