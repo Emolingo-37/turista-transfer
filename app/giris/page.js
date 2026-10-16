@@ -4,40 +4,43 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-const AUTH_TIMEOUT_MS = 10000;
-
-function withTimeout(promise, ms = AUTH_TIMEOUT_MS) {
-  let timeoutId;
-
-  const timeout = new Promise((_, reject) => {
-    timeoutId = setTimeout(() => {
-      reject(
-        new Error(
-          "Supabase 10 saniye içinde yanıt vermedi. Bağlantı veya oturum kontrol edilmeli."
-        )
-      );
-    }, ms);
-  });
-
-  return Promise.race([promise, timeout]).finally(() => {
-    clearTimeout(timeoutId);
-  });
-}
-
 export default function Giris() {
   const [mode, setMode] = useState("login");
-  const [f, setF] = useState({
+  const [form, setForm] = useState({
     full_name: "",
     phone: "",
     email: "",
     password: "",
   });
-  const [msg, setMsg] = useState("");
+  const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const set = (key) => (e) => {
-    setF((prev) => ({ ...prev, [key]: e.target.value }));
-  };
+  function updateField(e) {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  }
+
+  async function runWithTimeout(promise, ms = 15000) {
+    let timer;
+
+    try {
+      return await Promise.race([
+        promise,
+        new Promise((_, reject) => {
+          timer = setTimeout(
+            () => reject(
+              new Error(
+                "Sunucudan 15 saniye içinde yanıt alınamadı. İnternet bağlantısını kontrol edip tekrar deneyin."
+              )
+            ),
+            ms
+          );
+        }),
+      ]);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
 
   async function submit(e) {
     e.preventDefault();
@@ -45,140 +48,85 @@ export default function Giris() {
     if (busy) return;
 
     setBusy(true);
-    setMsg("");
-
-    const email = f.email.trim();
-
-    console.log("[AUTH DEBUG] Form gönderildi", {
-      mode,
-      email,
-      time: new Date().toISOString(),
-    });
+    setMessage("");
 
     try {
+      const email = form.email.trim().toLowerCase();
+
       if (mode === "login") {
-        console.log("[LOGIN DEBUG] Supabase isteği gönderiliyor");
-
-        let result;
-
-        try {
-          result = await withTimeout(
-            supabase.auth.signInWithPassword({
-              email,
-              password: f.password,
-            })
-          );
-        } catch (err) {
-          console.error("[LOGIN DEBUG] İstek tamamlanamadı:", err);
-          setMsg(
-            err?.message ||
-              "Giriş isteği tamamlanamadı. Lütfen tekrar deneyin."
-          );
-          return;
-        }
-
-        const { data, error } = result;
-
-        console.log("[LOGIN DEBUG] Supabase yanıtı", {
-          hasUser: !!data?.user,
-          hasSession: !!data?.session,
-          error: error?.message ?? null,
-          status: error?.status ?? null,
-        });
-
-        if (error) {
-          console.error("[LOGIN DEBUG] Supabase hata ayrıntısı:", error);
-          setMsg("Giriş hatası: " + error.message);
-          return;
-        }
-
-        if (!data?.session) {
-          console.error("[LOGIN DEBUG] Oturum bulunamadı");
-          setMsg(
-            "Giriş yanıtı alındı ancak oturum oluşturulmadı. E-posta doğrulamasını kontrol edin."
-          );
-          return;
-        }
-
-        console.log("[LOGIN DEBUG] Giriş başarılı", {
-          hasSession: true,
-          userId: data.user?.id,
-          expiresAt: data.session.expires_at,
-        });
-
-        setMsg("Giriş başarılı. Uygulama açılıyor...");
-
-        window.location.assign("/app.html");
-        return;
-      }
-
-      console.log("[REGISTER DEBUG] Supabase kayıt isteği gönderiliyor");
-
-      let result;
-
-      try {
-        result = await withTimeout(
-          supabase.auth.signUp({
+        const result = await runWithTimeout(
+          supabase.auth.signInWithPassword({
             email,
-            password: f.password,
-            options: {
-              data: {
-                full_name: f.full_name.trim(),
-                phone: f.phone.trim(),
-              },
-            },
+            password: form.password,
           })
         );
-      } catch (err) {
-        console.error("[REGISTER DEBUG] İstek tamamlanamadı:", err);
-        setMsg(
-          err?.message ||
-            "Kayıt isteği tamamlanamadı. Lütfen tekrar deneyin."
+
+        if (result.error) {
+          console.error("Giriş hatası:", result.error);
+          setMessage("Giriş yapılamadı: " + result.error.message);
+          return;
+        }
+
+        if (!result.data?.session) {
+          setMessage(
+            "Giriş tamamlandı ancak oturum oluşturulamadı. Tekrar deneyin."
+          );
+          return;
+        }
+
+        setMessage("Giriş başarılı. Uygulama açılıyor...");
+
+        window.location.replace("/app.html");
+        return;
+      }
+
+      const result = await runWithTimeout(
+        supabase.auth.signUp({
+          email,
+          password: form.password,
+          options: {
+            data: {
+              full_name: form.full_name.trim(),
+              phone: form.phone.trim(),
+            },
+          },
+        })
+      );
+
+      if (result.error) {
+        console.error("Kayıt hatası:", result.error);
+        setMessage("Kayıt yapılamadı: " + result.error.message);
+        return;
+      }
+
+      if (!result.data?.session) {
+        setMessage(
+          "Kayıt isteği alındı. E-posta doğrulaması gerekiyorsa gelen kutunu kontrol et."
         );
         return;
       }
 
-      const { data, error } = result;
-
-      console.log("[REGISTER DEBUG] Supabase yanıtı", {
-        hasUser: !!data?.user,
-        hasSession: !!data?.session,
-        error: error?.message ?? null,
-        status: error?.status ?? null,
-      });
-
-      if (error) {
-        console.error("[REGISTER DEBUG] Kayıt hatası:", error);
-        setMsg("Kayıt hatası: " + error.message);
-        return;
-      }
-
-      if (!data?.session) {
-        setMsg(
-          "Kayıt alındı. E-posta doğrulaması gerekiyorsa gelen kutunu kontrol et."
-        );
-        return;
-      }
-
-      console.log("[REGISTER DEBUG] Kayıt ve oturum başarılı");
-
-      setMsg("Kayıt başarılı. Uygulama açılıyor...");
-      window.location.assign("/app.html");
-    } catch (err) {
-      console.error("[AUTH DEBUG] Beklenmeyen hata:", err);
-      setMsg(
-        "Beklenmeyen hata: " +
-          (err?.message || String(err))
+      setMessage("Kayıt başarılı. Uygulama açılıyor...");
+      window.location.replace("/app.html");
+    } catch (error) {
+      console.error("Kimlik doğrulama hatası:", error);
+      setMessage(
+        error?.message ||
+          "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin."
       );
     } finally {
       setBusy(false);
-      console.log("[AUTH DEBUG] İşlem tamamlandı");
     }
   }
 
+  function toggleMode() {
+    setMode((prev) => prev === "login" ? "register" : "login");
+    setMessage("");
+  }
+
   return (
-    <div className="mx-auto max-w-md px-5 py-16">
-      <div className="rounded-3xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
+    <main className="mx-auto max-w-md px-5 py-16">
+      <section className="rounded-3xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
         <h1 className="font-display text-3xl font-bold">
           {mode === "login" ? "Giriş yap" : "Hesap oluştur"}
         </h1>
@@ -191,20 +139,20 @@ export default function Giris() {
                 name="full_name"
                 placeholder="Ad soyad"
                 autoComplete="name"
+                value={form.full_name}
+                onChange={updateField}
                 required
-                value={f.full_name}
-                onChange={set("full_name")}
               />
 
               <input
                 className="field"
                 name="phone"
-                placeholder="Telefon (05xx xxx xx xx)"
                 type="tel"
+                placeholder="Telefon (05xx xxx xx xx)"
                 autoComplete="tel"
+                value={form.phone}
+                onChange={updateField}
                 required
-                value={f.phone}
-                onChange={set("phone")}
               />
             </>
           )}
@@ -215,9 +163,9 @@ export default function Giris() {
             type="email"
             placeholder="E-posta"
             autoComplete="email"
+            value={form.email}
+            onChange={updateField}
             required
-            value={f.email}
-            onChange={set("email")}
           />
 
           <input
@@ -226,23 +174,21 @@ export default function Giris() {
             type="password"
             placeholder="Şifre (en az 6 karakter)"
             autoComplete={
-              mode === "login"
-                ? "current-password"
-                : "new-password"
+              mode === "login" ? "current-password" : "new-password"
             }
             minLength={6}
+            value={form.password}
+            onChange={updateField}
             required
-            value={f.password}
-            onChange={set("password")}
           />
 
-          {msg && (
+          {message && (
             <p
               role="alert"
               aria-live="polite"
               className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900"
             >
-              {msg}
+              {message}
             </p>
           )}
 
@@ -252,7 +198,7 @@ export default function Giris() {
             disabled={busy}
           >
             {busy
-              ? "Bekleniyor..."
+              ? "İşleniyor..."
               : mode === "login"
                 ? "Giriş yap"
                 : "Kayıt ol"}
@@ -261,20 +207,15 @@ export default function Giris() {
 
         <button
           type="button"
+          onClick={toggleMode}
           disabled={busy}
-          onClick={() => {
-            setMode((prev) =>
-              prev === "login" ? "register" : "login"
-            );
-            setMsg("");
-          }}
           className="mt-5 text-sm text-slate-600 underline disabled:opacity-50"
         >
           {mode === "login"
             ? "Hesabın yok mu? Kayıt ol"
             : "Zaten hesabın var mı? Giriş yap"}
         </button>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
