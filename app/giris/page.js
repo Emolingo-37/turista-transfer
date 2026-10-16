@@ -44,7 +44,11 @@ export default function Giris() {
           setMsg("Giriş yapıldı ancak oturum bulunamadı. Tekrar deneyin.");
           return;
         }
-
+console.log("GİRİŞ BAŞARILI", {
+  hasSession: !!data.session,
+  userId: data.user?.id,
+  expiresAt: data.session?.expires_at,
+});
         window.location.assign("/app.html");
         return;
       }
