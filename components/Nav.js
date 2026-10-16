@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-const LINKS = [["/", "Ana menü"], ["/yerler", "Turistik yerler"], ["/sohbet", "Transfer asistanı"], ["/taleplerim", "Taleplerim"]];
+const LINKS = [["/", "Ana menü"], ["/taleplerim", "Taleplerim"]];
 
 export default function Nav() {
   const [session, setSession] = useState(null);
@@ -32,7 +32,7 @@ export default function Nav() {
           {LINKS.map(([h, l]) => item(h, l))}
           {session ? (
             <>
-              {item("/hesabim", "Hesabım")}
+              
               <button onClick={logout} className="ml-2 rounded-xl border border-white/30 px-3 py-1.5 hover:border-gold">Çıkış</button>
             </>
           ) : (
@@ -48,7 +48,7 @@ export default function Nav() {
           {LINKS.map(([h, l]) => item(h, l))}
           {session ? (
             <>
-              {item("/hesabim", "Hesabım")}
+              
               <button onClick={logout} className="px-3 py-2 text-left text-white/70">Çıkış yap</button>
             </>
           ) : item("/giris", "Giriş yap / Kayıt ol")}

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Turista Transfer</title>
+<style>
+:root{--p:#0A2342;--s:#13315C;--g:#D4AF37;--v:#6D5BD0;--bg:#F8FAFC;--tx:#0f172a;--mu:#64748b}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",system-ui,sans-serif;background:linear-gradient(160deg,var(--p),var(--s));display:flex;align-items:center;justify-content:center;color:var(--tx);-webkit-font-smoothing:antialiased}
+.app{width:100%;max-width:430px;height:100%;max-height:900px;background:var(--bg);position:relative;overflow:hidden;display:flex;flex-direction:column}
+@media(min-width:500px){.app{height:92vh;aspect-ratio:9/16;border-radius:34px;box-shadow:0 30px 80px #0008}}
+#splash{position:absolute;inset:0;z-index:50;background:linear-gradient(160deg,var(--p),var(--s) 70%,#2a2468);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;transition:opacity .6s,visibility .6s}
+#splash.hide{opacity:0;visibility:hidden}
+.lg{width:92px;height:92px;border-radius:28px;background:var(--g);color:var(--p);font-size:48px;font-weight:800;display:grid;place-items:center;box-shadow:0 0 0 0 #D4AF3780;animation:pulse 1.6s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 28px #D4AF3700}}
+#splash h1{margin-top:22px;font-size:28px;letter-spacing:-.02em}#splash p{color:#cbd5e1;margin-top:6px;font-size:14px}
+.view{flex:1;overflow-y:auto;padding:18px 18px 100px;display:none}.view.on{display:block}
+h2{font-size:26px;letter-spacing:-.02em}.sub{color:var(--mu);font-size:14px;margin-top:4px}
+.hero{margin-top:18px;background:linear-gradient(145deg,var(--p),var(--s) 65%,#3b2f8f);border-radius:28px;padding:22px;color:#fff}
+.hero b{font-size:20px;letter-spacing:-.01em}.hero p{color:#cbd5e1;font-size:13px;margin:6px 0 18px;line-height:1.45}
+.pill{width:100%;display:flex;align-items:center;gap:12px;border:0;background:#fff;color:var(--p);padding:7px 7px 7px 20px;border-radius:999px;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px #0006;text-align:left}
+.pill span{flex:1}.pill i{width:46px;height:46px;border-radius:50%;background:var(--g);display:grid;place-items:center;font-style:normal;font-size:20px}
+.sec{font-size:17px;font-weight:700;margin:24px 0 10px}
+.how{display:flex;gap:10px}.how div{flex:1;background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:12px;font-size:12px;color:var(--mu);line-height:1.35}
+.how b{display:block;color:var(--p);font-size:13px;margin:4px 0 2px}
+.hs{display:flex;gap:12px;overflow-x:auto;margin:0 -18px;padding:0 18px 4px;scrollbar-width:none}
+.pc{flex:none;width:150px;border-radius:22px;overflow:hidden;background:#fff;border:1px solid #e2e8f0;cursor:pointer}
+.pc .im,.pl .im{height:92px;display:grid;place-items:center;font-size:38px}
+.pc div:last-child{padding:10px 12px;font-size:13px;font-weight:700}.pc small{display:block;color:var(--mu);font-weight:500;font-size:11px}
+.pl{background:#fff;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;margin-bottom:14px}
+.pl .im{height:120px;font-size:52px}.pl .bd{padding:14px}.pl h3{font-size:17px}.pl p{font-size:13px;color:var(--mu);line-height:1.45;margin:6px 0 10px}
+.tag{display:inline-block;background:#efeafd;color:var(--v);font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;margin-right:6px}
+.sm{border:0;background:var(--p);color:var(--g);padding:10px 16px;border-radius:99px;font-weight:700;font-size:13px;cursor:pointer;margin-top:4px}
+.prof{display:flex;align-items:center;gap:14px;background:linear-gradient(145deg,var(--p),var(--s));color:#fff;border-radius:26px;padding:18px;margin-top:16px}
+.av{width:58px;height:58px;border-radius:50%;background:var(--g);color:var(--p);font-weight:800;font-size:22px;display:grid;place-items:center}
+.lst{background:#fff;border:1px solid #e2e8f0;border-radius:22px;margin-top:10px;overflow:hidden}
+.li{display:flex;align-items:center;gap:12px;padding:14px 16px;font-size:15px;border-bottom:1px solid #f1f5f9;cursor:pointer}
+.li:last-child{border:0}.li em{font-style:normal;width:32px;height:32px;border-radius:10px;background:#efeafd;display:grid;place-items:center}.li span{flex:1}.li small{color:var(--mu)}
+.fld{width:100%;border:1.5px solid #e2e8f0;border-radius:14px;padding:12px;font-size:15px;margin-top:8px;background:#fff;font-family:inherit}
+.sw{width:48px;height:28px;border-radius:99px;background:#cbd5e1;position:relative;cursor:pointer;flex:none;transition:.2s}
+.sw:after{content:"";position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s}.sw.on{background:var(--g)}.sw.on:after{left:23px}
+nav{position:absolute;left:0;right:0;bottom:0;display:flex;background:#ffffffee;backdrop-filter:blur(16px);border-top:1px solid #e2e8f0;padding:8px 8px max(10px,env(safe-area-inset-bottom));z-index:10}
+nav button{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:600;color:#94a3b8;cursor:pointer;padding:4px;font-family:inherit}
+nav button b{font-size:22px;filter:grayscale(1) opacity(.6)}nav button.on{color:var(--p)}nav button.on b{filter:none}
+#chatv{position:absolute;inset:0;z-index:30;background:var(--bg);display:none;flex-direction:column}#chatv.on{display:flex}
+.ch{background:var(--p);color:#fff;padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top))}
+.ch .t{display:flex;align-items:center;gap:10px}.ch .t button{border:0;background:#ffffff20;color:#fff;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer}
+.ch b{font-size:16px}.ch small{display:block;color:#cbd5e1;font-size:11px}
+.steps{display:flex;gap:6px;margin-top:12px}
+.st{flex:1;font-size:10.5px;text-align:center;padding:7px 2px;border-radius:12px;background:#ffffff14;color:#94a3b8;font-weight:600}
+.st.on{background:var(--g);color:var(--p)}.st.done{background:#ffffff30;color:#fff}
+#chat{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.m{max-width:85%;padding:11px 14px;border-radius:20px;font-size:15px;line-height:1.45;animation:in .25s}
+.bot{background:#fff;border:1px solid #e2e8f0;align-self:flex-start;border-bottom-left-radius:6px}
+.me{background:var(--s);color:#fff;align-self:flex-end;border-bottom-right-radius:6px}
+@keyframes in{from{opacity:0;transform:translateY(6px)}}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:22px;padding:14px;box-shadow:0 6px 20px #0a234614;animation:in .3s}
+.card h4{font-size:12px;color:var(--v);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;font-size:13px;border-bottom:1px dashed #e2e8f0}
+.row:last-child{border:0}.row span{color:var(--mu)}.row b{text-align:right}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--g);background:#fff;color:var(--p);padding:9px 14px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}.chip:hover{background:var(--g)}
+.btn{width:100%;border:0;background:var(--g);color:var(--p);padding:14px;border-radius:16px;font-size:15px;font-weight:800;margin-top:10px;cursor:pointer;font-family:inherit}
+.btn.alt{background:#fff;border:1.5px solid #cbd5e1;color:var(--mu);font-weight:600}.btn:disabled{opacity:.5}
+footer{padding:10px 12px;padding-bottom:max(10px,env(safe-area-inset-bottom));background:#fff;border-top:1px solid #e2e8f0;display:flex;gap:8px}
+footer input{flex:1;border:1.5px solid #e2e8f0;border-radius:999px;padding:12px 16px;font-size:15px;outline:none;background:var(--bg);font-family:inherit}
+footer input:focus{border-color:var(--g)}footer button{width:46px;border:0;border-radius:50%;background:var(--p);color:var(--g);font-size:18px;cursor:pointer}
+.bar{height:8px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin:10px 0}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--g),#f3dc84);transition:width .4s}
+.tg{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--bg);border-radius:16px;padding:10px 12px;font-size:13px;margin-top:8px}
+.car{height:96px;border-radius:16px;background:linear-gradient(135deg,var(--p),var(--s));display:grid;place-items:center;color:#fff;font-weight:700;margin-bottom:8px}.car span{display:block;color:var(--g);font-size:30px;text-align:center}
+.shield{background:#fffbeb;border:1px solid #f3dc84;border-radius:14px;padding:10px 12px;font-size:12px;color:#7a5c00;margin-top:8px}
+.two{display:flex;gap:8px}.dots span{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--mu);margin-right:3px;animation:b 1s infinite}
+.dots span:nth-child(2){animation-delay:.15s}.dots span:nth-child(3){animation-delay:.3s}@keyframes b{50%{transform:translateY(-4px)}}
+.bot{background:none!important;border:0!important;padding:4px 2px!important;font-size:18px;font-weight:600;letter-spacing:-.015em;max-width:96%!important;line-height:1.35}
+.m.me{background:linear-gradient(135deg,var(--s),var(--v))}
+#chatv{background:radial-gradient(circle at 80% -10%,#6D5BD022,transparent 50%),radial-gradient(circle at 0% 100%,#D4AF3722,transparent 45%),var(--bg)}
+.chips.col{flex-direction:column;align-items:flex-start}.chips.col .chip{text-align:left;border-radius:18px;border:1.5px solid #e2e8f0;background:#fff;font-weight:500;padding:12px 14px;box-shadow:0 4px 14px #0a234610}
+.lb{display:block;font-size:12px;font-weight:600;color:var(--mu);margin-top:12px}.fld.bad{border-color:#ef4444;background:#fef2f2;animation:sh .3s}@keyframes sh{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.sp{flex:1;display:flex;flex-direction:column;gap:6px;background:var(--bg);border-radius:18px;padding:10px 12px;margin-top:12px;font-size:12px;font-weight:600;color:var(--mu)}
+.sp div{display:flex;align-items:center;justify-content:space-between}.sp b{font-size:24px;color:var(--p)}
+.sp button{width:34px;height:34px;border-radius:50%;border:0;background:var(--p);color:var(--g);font-size:20px;cursor:pointer}
+.vp{display:flex;align-items:center;gap:12px;margin-top:10px;background:linear-gradient(135deg,#efeafd,#fff7dc);border-radius:18px;padding:10px 14px;font-size:13px}.vp i{font-style:normal;font-size:30px}.vp small{display:block;color:var(--mu);font-size:11px}
+.tiles{display:flex;gap:8px;margin-top:6px}.tile{flex:1;border:1.5px solid #e2e8f0;background:#fff;border-radius:16px;padding:10px 4px;font-size:11px;font-weight:600;color:var(--mu);cursor:pointer;font-family:inherit;transition:.15s}
+.tile i{display:block;font-style:normal;font-size:22px;margin-bottom:3px}.tile.on{border-color:var(--g);background:#fffbeb;color:var(--p);transform:translateY(-2px)}
+.seg{display:flex;background:var(--bg);border-radius:14px;padding:4px;margin-top:12px}.seg button{flex:1;border:0;background:none;padding:10px;border-radius:11px;font-weight:700;font-size:13px;color:var(--mu);cursor:pointer;font-family:inherit}.seg button.on{background:var(--p);color:#fff}
+.pr{display:flex;gap:10px;align-items:flex-start;margin-top:6px}.pn{width:28px;height:28px;border-radius:50%;background:var(--g);color:var(--p);font-weight:800;font-size:13px;display:grid;place-items:center;margin-top:14px;flex:none}
+.ok{text-align:center;padding:10px 0 4px}.ok svg{width:96px;height:96px;animation:pop .5s .1s both}.ok .c{fill:#dcfce7;stroke:#22c55e;stroke-width:2.5;stroke-dasharray:151;stroke-dashoffset:151;animation:dr .7s .1s forwards}
+.ok .k{fill:none;stroke:#16a34a;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;animation:dr .5s .7s forwards}
+@keyframes dr{to{stroke-dashoffset:0}}@keyframes pop{0%{transform:scale(.6)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
+.ok h3{font-size:22px;margin-top:10px;color:#15803d;animation:in .5s 1s both}.ok .no{font-size:13px;color:var(--mu);margin-top:6px;animation:in .5s 1.1s both}.ok p{font-size:14px;margin-top:10px;line-height:1.45;animation:in .5s 1.25s both}
+.okc{box-shadow:0 10px 40px #22c55e30!important}
+.big{flex:none;width:158px;height:130px;border-radius:26px;color:#fff;padding:14px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;font-weight:700;font-size:14px;line-height:1.25}.big i{font-style:normal;font-size:40px}
+.tl{margin-top:4px;position:relative}.tl:before{content:"";position:absolute;left:19px;top:20px;bottom:20px;width:2px;background:linear-gradient(var(--g),var(--v))}
+.ts{display:flex;gap:14px;padding:8px 0;position:relative}.ts em{font-style:normal;flex:none;width:40px;height:40px;border-radius:14px;background:#fff;border:2px solid var(--g);display:grid;place-items:center;font-size:18px;z-index:1}
+.ts b{font-size:15px}.ts small{display:block;color:var(--mu);font-size:12.5px;margin-top:2px;line-height:1.4}
+.hero{background:radial-gradient(circle at 92% 0%,#6D5BD038,transparent 55%),radial-gradient(circle at 0 105%,#D4AF3750,transparent 50%),#fff;color:var(--p);border:1px solid #ece8fb;padding:28px 20px 22px;box-shadow:0 20px 50px #6D5BD018}
+.hero b{display:block;font-size:34px;line-height:1.05;letter-spacing:-.035em}.hero p{color:var(--mu);margin:10px 0 22px}
+.pill{border:2px solid var(--p);box-shadow:0 12px 32px #0a23423a;padding:8px 8px 8px 22px;font-size:15px}.pill span{transition:opacity .35s;color:var(--mu);font-weight:600}
+.big{width:172px;height:196px;border-radius:30px;color:var(--p);padding:16px;font-size:15px;letter-spacing:-.01em;box-shadow:0 12px 30px #0a23420f;transition:transform .2s}.big:active{transform:scale(.96)}
+.big i{font-size:68px;line-height:1;filter:drop-shadow(0 8px 10px #0a234628);animation:fl 3.2s ease-in-out infinite}.big:nth-child(even) i{animation-delay:-1.6s}
+@keyframes fl{50%{transform:translateY(-6px) rotate(-4deg)}}
+.st{transition:.35s}.st:not(.on){font-size:0;height:6px;padding:0;flex:.3;align-self:center}
+.card{animation:rise .5s cubic-bezier(.2,1.2,.4,1)}@keyframes rise{from{opacity:0;transform:translateY(20px) scale(.96)}}
+.rt{padding:2px}.rp{display:flex;align-items:center;gap:6px;margin:6px 0 4px}.rp .d{width:14px;height:14px;border-radius:50%;flex:none;border:3px solid var(--p);background:#fff}.rp .d.b{background:var(--g);border-color:var(--g);box-shadow:0 0 0 5px #D4AF3733}
+.ln{flex:1;position:relative;border-top:2.5px dashed var(--g);height:0}.ln i{position:absolute;top:-17px;left:0;font-style:normal;font-size:26px;animation:dr2 3.4s ease-in-out infinite alternate}@keyframes dr2{to{left:calc(100% - 30px)}}
+.rn{display:flex;justify-content:space-between;gap:10px;font-size:14px;margin-top:10px;letter-spacing:-.01em}.rn b:last-child{text-align:right}
+.rc{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.rc span{background:var(--bg);border-radius:99px;padding:6px 11px;font-size:12px;font-weight:600;color:var(--p)}
+.seats{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 2px;align-items:center}.seats i{width:14px;height:14px;border-radius:50%;background:#e2e8f0}.seats i.f{background:var(--g);animation:pp .4s both}.seats small{margin-left:6px;font-size:11px;color:var(--mu);font-weight:600}@keyframes pp{from{transform:scale(0)}}
+.brand,.usr{display:none}.cols{display:block}
+@media(min-width:1024px){
+body{background:var(--bg)}
+.app{max-width:none;max-height:none;height:100vh;aspect-ratio:auto;border-radius:0;box-shadow:none;flex-direction:row}
+nav{position:relative;order:-1;flex:none;width:260px;flex-direction:column;gap:6px;padding:26px 16px 20px;background:linear-gradient(175deg,var(--p),var(--s) 75%,#2a2468);border:0;backdrop-filter:none}
+.brand{display:flex;align-items:center;gap:12px;color:#fff;padding:2px 10px 26px}.brand b{font-size:17px;display:block}.brand small{color:#94a3b8;font-size:12px}
+.lg2{width:44px;height:44px;border-radius:14px;background:var(--g);color:var(--p);font-weight:800;font-size:24px;display:grid;place-items:center}
+nav button{flex:none;flex-direction:row;justify-content:flex-start;gap:12px;font-size:15px;color:#cbd5e1;padding:13px 14px;border-radius:16px;transition:.15s}
+nav button b{font-size:20px;filter:none}nav button:hover{background:#ffffff14}nav button.on{background:var(--g);color:var(--p)}
+.usr{display:flex;align-items:center;gap:10px;margin-top:auto;padding:12px;border-radius:18px;background:#ffffff14;color:#fff;cursor:pointer}.usr .av{width:40px;height:40px;font-size:16px}.usr b{font-size:14px;display:block}.usr small{font-size:12px;color:#94a3b8}
+.view{padding:36px max(48px,calc((100% - 1240px)/2)) 56px}h2{font-size:32px}
+#v-home.on{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);column-gap:32px;align-content:start}
+#v-home>*{grid-column:1/-1}
+#v-home>:nth-child(1){grid-column:1;grid-row:1}#v-home>:nth-child(2){grid-column:1;grid-row:2}#v-home>.hero{grid-column:1;grid-row:3;margin-top:20px;padding:44px 40px 40px}
+#v-home>:nth-child(4){grid-column:1;grid-row:4}#v-home>:nth-child(5){grid-column:1;grid-row:5}
+#v-home>:nth-child(6){grid-column:2;grid-row:3;margin-top:20px;align-self:start}
+#v-home>.tl{grid-column:2;grid-row:3/span 3;align-self:start;margin-top:64px!important;background:#fff;border:1px solid #e2e8f0;border-radius:28px;padding:18px 20px;margin-top:0}.tl:before{left:39px;top:38px;bottom:38px}
+#v-home>:nth-child(8){grid-row:6}#v-home>:nth-child(9){grid-row:7}
+#v-home>.sec{margin-top:32px}#v-home>:nth-child(6){margin-top:20px}
+.hero b{font-size:40px}.hero p{font-size:15px;max-width:520px}.pill{max-width:560px;font-size:16px}.pill:hover{box-shadow:0 16px 38px #0a234650}
+#routes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:0;padding:0;overflow:visible}#routes .big{width:auto;height:190px;font-size:13px;padding:12px;letter-spacing:-.02em}#routes .big i{font-size:52px}.big:hover{transform:translateY(-4px)}
+#homeplaces{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;margin:0;padding:0;overflow:visible}.pc{width:auto;transition:.2s}.pc:hover{transform:translateY(-4px);box-shadow:0 14px 30px #0a234620}.pc .im{height:130px;font-size:46px}
+#places{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.pl{margin:0}.pl .im{height:150px;font-size:60px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}.cols>div:nth-child(2)>.sec:first-child{margin-top:16px}
+#chatv{left:260px}
+.ch{padding-left:max(20px,calc((100% - 780px)/2));padding-right:max(20px,calc((100% - 780px)/2))}
+#chat{padding:24px max(20px,calc((100% - 780px)/2))}
+footer{padding-left:max(20px,calc((100% - 780px)/2));padding-right:max(20px,calc((100% - 780px)/2))}
+.chip:hover{background:var(--g)}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<div id="splash"><div class="lg">T</div><h1>Turista Transfer</h1><p>Güvenli transferin adresi</p></div>
+
+<section class="view on" id="v-home">
+  <h2 id="hi">Merhaba 👋</h2><div class="sub">Transferinizi birlikte güvenle ayarlayalım.</div>
+  <div class="hero"><b>Nereye gidiyoruz? ✨</b><p>Nereye, kaç kişi, ne zaman? Kendi cümlelerinizle yazın; aracı biz bulalım, ödemeniz transfer bitene kadar güvencemizde.</p>
+    <button class="pill" onclick="openChat()"><span id="pt">Konuşmayı başlat…</span><i>💬</i></button></div>
+  <div class="sec">Ne yapmak istiyorsunuz?</div><div class="hs" id="routes"></div>
+  <div class="sec">Nasıl çalışır?</div>
+  <div class="tl">
+   <div class="ts"><em>💬</em><div><b>Seyahatinizi yazın</b><small>Kaç kişi, bavul, ek istek… Sohbet edin, formu biz dolduralım.</small></div></div>
+   <div class="ts"><em>🔍</em><div><b>Aracı biz bulalım</b><small>Doğrulanmış firmalarda uygun aracı ararız, bulununca bildirim alırsınız.</small></div></div>
+   <div class="ts"><em>🪪</em><div><b>Yolcu bilgileri ve ödeme</b><small>Yolcu bilgilerini girin, ödemeniz transfer bitene kadar güvencemizde kalır.</small></div></div>
+   <div class="ts"><em>✅</em><div><b>Şoför bilgisi SMS’le gelir</b><small>Ödeme sonrası şoför ve plaka bilgisi telefonunuza iletilir.</small></div></div>
+  </div>
+  <div class="sec">Keşfedilecek yerler</div>
+  <div class="hs" id="homeplaces"></div>
+</section>
+
+<section class="view" id="v-places"><h2>Turistik Yerler</h2><div class="sub">Gezmeye değer güzellikler. Beğendiğiniz yere transfer ayarlayın.</div><div style="margin-top:16px" id="places"></div></section>
+
+<section class="view" id="v-acc">
+  <h2>Hesap</h2>
+  <div class="cols"><div>
+  <div class="prof"><div class="av" id="av">M</div><div><b id="pn" style="font-size:18px">Misafir</b><div id="pm" style="color:#cbd5e1;font-size:13px;margin-top:2px">Bilgilerinizi ekleyin</div></div></div>
+  <div class="sec" style="margin-top:20px">Hesap Bilgileri</div>
+  <input class="fld" id="f-n" placeholder="Ad Soyad"><input class="fld" id="f-p" placeholder="Telefon" inputmode="tel"><input class="fld" id="f-e" placeholder="E-posta" inputmode="email" readonly>
+  <button class="btn" onclick="saveAcc()" id="sv">Kaydet</button>
+  </div><div>
+  <div class="sec">Ayarlar</div>
+  <div class="lst">
+    <div class="li"><em>🔔</em><span>Bildirimler</span><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+    <div class="li"><em>💬</em><span>SMS ile bilgilendirme</span><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+    <div class="li"><em>🌐</em><span>Dil</span><small>Türkçe</small></div>
+    <div class="li"><em>💳</em><span>Ödeme yöntemleri</span><small>›</small></div>
+  </div>
+  <div class="sec">Destek</div>
+  <div class="lst">
+    <div class="li" onclick="location.href='/taleplerim'"><em>🧾</em><span>Rezervasyonlarım</span><small>›</small></div>
+    <div class="li"><em>🛡️</em><span>Turista Güvence Programı</span><small>›</small></div>
+    <div class="li"><em>❓</em><span>Yardım ve iletişim</span><small>›</small></div>
+    <div class="li"><em>📄</em><span>Gizlilik ve kullanım şartları</span><small>›</small></div>
+    <div class="li" onclick="logout()"><em>🚪</em><span>Çıkış yap</span><small>›</small></div>
+  </div>
+  <div style="text-align:center;color:var(--mu);font-size:12px;margin-top:18px">Turista Transfer v1.0</div>
+  </div></div>
+</section>
+
+<nav><div class="brand"><div class="lg2">T</div><div><b>Turista Transfer</b><small>Güvenli transferin adresi</small></div></div><button class="on" data-t="home"><b>🏠</b>Ana Menü</button><button data-t="places"><b>🗺️</b>Turistik Yerler</button><button data-t="acc"><b>👤</b>Hesap</button><div class="usr" onclick="document.querySelector('nav button[data-t=acc]').click()"><div class="av" id="sav">M</div><div><b id="sn">Misafir</b><small id="sm">Hesabı düzenle</small></div></div></nav>
+
+<div id="chatv">
+  <div class="ch"><div class="t"><button onclick="closeChat()">‹</button><div><b>Turista Asistan</b><small>Ödemeniz güvencemizde</small></div></div>
+  <div class="steps"><div class="st on" id="s1">1 · Transfer Detayı</div><div class="st" id="s2">2 · Araç Aranıyor</div><div class="st" id="s3">3 · Yolcu & Ödeme</div></div></div>
+  <div id="chat"></div>
+  <footer><input id="inp" placeholder="Seyahatinizi yazın…" autocomplete="off"><button id="send" aria-label="Gönder">➤</button></footer>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const PL=[
+ ['Ayasofya','İstanbul','🕌','linear-gradient(135deg,#13315C,#6D5BD0)','1500 yıllık tarihiyle dünyanın en etkileyici yapılarından biri. Sabah erken saatlerde gitmek kalabalıktan kaçınmanızı sağlar.'],
+ ['Kapadokya','Nevşehir','🎈','linear-gradient(135deg,#6D5BD0,#D4AF37)','Peri bacaları ve gün doğumunda gökyüzünü dolduran balonlarıyla masalsı bir bölge.'],
+ ['Pamukkale','Denizli','🏔️','linear-gradient(135deg,#0A2342,#5b8fb9)','Beyaz travertenleri ve antik Hierapolis kentiyle UNESCO Dünya Mirası.'],
+ ['Efes Antik Kenti','İzmir','🏛️','linear-gradient(135deg,#8a6d1d,#D4AF37)','Roma döneminin en iyi korunmuş kentlerinden. Celsus Kütüphanesi görülmeli.'],
+ ['Sapanca Gölü','Sakarya','🌲','linear-gradient(135deg,#0f5132,#13315C)','İstanbul’a yakın, doğa ve bungalov tatili için ideal bir kaçamak.'],
+ ['Galata Kulesi','İstanbul','🗼','linear-gradient(135deg,#2a2468,#13315C)','Boğaz ve tarihi yarımadanın panoramik manzarası; gün batımında ayrı güzel.']];
+
+$('places').innerHTML=PL.map((p,i)=>`<div class="pl"><div class="im" style="background:${p[3]}">${p[2]}</div><div class="bd"><span class="tag">${p[1]}</span><h3 style="margin-top:8px">${p[0]}</h3><p>${p[4]}</p><button class="sm" onclick="openChat('${p[0]}')">Buraya transfer ayarla</button></div></div>`).join('');
+$('homeplaces').innerHTML=PL.slice(0,5).map(p=>`<div class="pc" onclick="openChat('${p[0]}')"><div class="im" style="background:${p[3]}">${p[2]}</div><div>${p[0]}<small>${p[1]}</small></div></div>`).join('');
+const TL=[['✈️','Havalimanından otele','Havalimanından otele 3 kişiyiz, 2 bavulumuz var','linear-gradient(160deg,#ece8ff,#cdc3ff)'],['👨‍👩‍👧','Aile transferi','Ailemle 5 kişiyiz, çocuk koltuğu lazım','linear-gradient(160deg,#fff1d6,#ffd98a)'],['🚌','Grup transferi','12 kişilik grubumuz var, Sapanca’ya gideceğiz','linear-gradient(160deg,#dbeafe,#a9c6f5)'],['🎈','Kapadokya gezisi','Kapadokya’ya gideceğiz, 4 kişiyiz','linear-gradient(160deg,#fde4f3,#f5b8dc)']];
+$('routes').innerHTML=TL.map((t,i)=>`<div class="big" style="background:${t[3]}" onclick="openChat(0,0,TL[${i}][2])"><i>${t[0]}</i>${t[1]}</div>`).join('');
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x==b));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id=='v-'+b.dataset.t))});
+const SB=supabase.createClient('https://fzobhmgfmqrfqvoxzalx.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ6b2JobWdmbXFyZnF2b3h6YWx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwODA2NjIsImV4cCI6MjEwNzY1NjY2Mn0.4pAtaRBjAB1Xre5yEaeAE7FY6GD02zzBZTj_u_3nF3w');
+let A={},UID=null;
+(async()=>{const {data}=await SB.auth.getSession();if(!data.session){location.href='/giris';return}
+ const u=data.session.user;UID=u.id;
+ const {data:p}=await SB.from('profiles').select('full_name,phone').eq('id',u.id).maybeSingle();
+ A={n:(p&&p.full_name)||'',p:(p&&p.phone)||'',e:u.email||''};showAcc();})();
+async function logout(){await SB.auth.signOut();location.href='/giris'}
+async function saveBooking(){try{
+ if(!T.rid){const {data:r,error}=await SB.from('transfer_requests').insert({user_id:UID,pickup:T.from,dropoff:T.to,pickup_at:new Date(T.iso).toISOString(),passenger_count:T.n,luggage_count:lug,extras:{items:[...extras],way:T.way,flight:T.flight||null,estimate_try:cur.pr+150,phone:T.phone},vehicle_category:T.n<=8?'vito':T.n<=16?'sprinter':'midibus',status:'confirmed',payment_status:'pending'}).select().single();
+  if(error)return{ok:false,err:error.message};T.rid=r.id}
+ if(!T.psaved){const {error:e2}=await SB.from('passengers').insert(T.people.map(p=>({request_id:T.rid,full_name:p.n,tc_no:p.tc})));
+  if(e2)return{ok:false,err:e2.message};T.psaved=1}
+ return{ok:true,no:T.rid.slice(0,6).toUpperCase()}}catch(e){return{ok:false,err:String(e)}}}
+function showAcc(){$('f-n').value=A.n||'';$('f-p').value=A.p||'';$('f-e').value=A.e||'';
+ $('pn').textContent=A.n||'Misafir';$('pm').textContent=A.e||A.p||'Bilgilerinizi ekleyin';$('av').textContent=(A.n||'M')[0].toUpperCase();
+ $('hi').textContent=A.n?'Merhaba, '+A.n.split(' ')[0]+' 👋':'Merhaba 👋';
+ $('sn').textContent=A.n||'Misafir';$('sm').textContent=A.e||A.p||'Hesabı düzenle';$('sav').textContent=(A.n||'M')[0].toUpperCase()}
+function saveAcc(){A={n:$('f-n').value.trim(),p:$('f-p').value.trim(),e:$('f-e').value.trim()};if(UID)SB.from('profiles').update({full_name:A.n,phone:A.p}).eq('id',UID).then(r=>{if(r.error)alert('Kaydedilemedi: '+r.error.message)});showAcc();$('sv').textContent='✓ Kaydedildi';setTimeout(()=>$('sv').textContent='Kaydet',1500)}
+const PH=['Havalimanından otele 4 kişiyiz…','Ailemle Kapadokya’ya gitmek istiyoruz…','12 kişilik grubumuz Sapanca’ya…','Yarın 09:00 Taksim’e, 3 bavulumuz var…'];let pi=0;setInterval(()=>{const e=$('pt');if(!e)return;e.style.opacity=0;setTimeout(()=>{pi=(pi+1)%PH.length;e.textContent=PH[pi];e.style.opacity=1},350)},2800);$('pt').textContent=PH[0];
+showAcc();setTimeout(()=>$('splash').classList.add('hide'),2200);
+
+/* ---- Chat ---- */
+const chat=$('chat'),inp=$('inp');let T={},mode='free',notify=false,pax=2,lug=2,way='Tek yön',extras=new Set();
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+const AL=[['havalimanı|\\bist\\b|airport','İstanbul Havalimanı'],['sabiha|\\bsaw\\b','Sabiha Gökçen'],['antalya','Antalya Havalimanı'],['sultanahmet|ayasofya','Sultanahmet'],['taksim|galata','Taksim'],['sapanca','Sapanca'],['bursa','Bursa'],['kapadokya|göreme|nevşehir','Kapadokya'],['pamukkale|denizli','Pamukkale'],['efes|izmir','İzmir (Efes)'],['kemer','Kemer']];
+const EX=[['👶','Çocuk koltuğu','çocuk|bebek'],['🪧','İsimle karşılama','karşıla|tabela'],['♿','Tekerlekli sandalye','tekerlekli|engelli']];
+const IDEAS=['Havalimanından otele 4 kişiyiz, 3 bavulumuz var','Yarın 09:00 Sabiha Gökçen’den Taksim’e, çocuk koltuğu lazım','12 kişilik ekibimizle Sapanca’ya gideceğiz'];
+const iso=d=>new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+function parse(t){const l=t.toLocaleLowerCase('tr'),s={},f=[];
+ AL.forEach(([r,n])=>{const m=l.search(new RegExp(r));if(m>=0)f.push([m,n])});f.sort((a,b)=>a[0]-b[0]);
+ if(f.length>1){s.from=f[0][1];s.to=f[1][1]}else if(f.length){(/Havalimanı|Sabiha/.test(f[0][1])?s.from=f[0][1]:s.to=f[0][1])}
+ let m=l.match(/(\d+)\s*(kişi|kisi|yolcu)/);if(m)s.pax=+m[1];
+ m=l.match(/(\d+)\s*(bavul|valiz)/);if(m)s.lug=+m[1];
+ m=l.match(/(\d{1,2})[:.](\d{2})/);if(m)s.time=m[1].padStart(2,'0')+':'+m[2];
+ const d=new Date();if(/yarın/.test(l)){d.setDate(d.getDate()+1);s.date=iso(d)}else if(/bugün/.test(l))s.date=iso(d);
+ if(/dönüş/.test(l))s.way='Gidiş-dönüş';s.ex=EX.filter(e=>new RegExp(e[2]).test(l)).map(e=>e[1]);return s}
+function add(h,c){const d=document.createElement('div');d.className=c;d.innerHTML=h;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;return d}
+function bot(h,chips,cb){const t=add('<span class="dots"><span></span><span></span><span></span></span>','m bot');
+ setTimeout(()=>{t.innerHTML=h;if(chips&&chips.length){const w=add('','chips col');chips.forEach(x=>{const b=document.createElement('button');b.className='chip';b.textContent=x;b.onclick=()=>{w.remove();submit(x)};w.appendChild(b)})}chat.scrollTop=chat.scrollHeight;cb&&cb()},550)}
+function step(n){[1,2,3].forEach(i=>{$('s'+i).className='st'+(i<n?' done':i==n?' on':'')})}
+function openChat(to,from,text){T={};vi=0;mode='free';notify=false;pax=2;lug=2;way='Tek yön';extras=new Set();chat.innerHTML='';step(1);$('chatv').classList.add('on');
+ if(to||from){mode='form';bot((to?`<b>${to}</b> için `:'')+'formu hazırladım ✨ Eksikleri tamamlayın.',null,()=>showForm({to,from}));return}
+ if(text){submit(text);return}
+ bot('Merhaba, ben Turista Asistan ✨<br>Nereye, kaç kişi, ne zaman? <b>Seyahatinizi kendi cümlelerinizle yazın</b>, size uygun aracı bulayım.',IDEAS)}
+function closeChat(){$('chatv').classList.remove('on')}
+function submit(v){v=(v||inp.value).trim();if(!v)return;inp.value='';
+ if(mode!=='free'){if(mode==='form')bot('Detayları yukarıdaki karttan düzenleyebilirsiniz 👆');return}
+ add(esc(v),'m me');mode='form';const s=parse(v);
+ bot('Anladım ✨ Çıkardığım bilgileri forma işledim. Kontrol edin, eksikleri tamamlayın.',null,()=>showForm(s))}
+function vinfo(n){return n<=8?['🚐','Vito / Caravelle','8 kişiye kadar']:n<=16?['🚌','Sprinter VIP','9-16 kişi']:['🚍','21-25 kişilik midibüs','17+ kişi']}
+function showForm(s){pax=s.pax||pax;if(s.lug!=null)lug=s.lug;way=s.way||way;(s.ex||[]).forEach(x=>extras.add(x));
+ const today=iso(new Date());
+ add(`<div id="tf"><h4>Transfer Detayı</h4>
+ <label class="lb">Nereden</label><input class="fld" id="f-from" list="pl" placeholder="Kalkış noktası" value="${esc(s.from||'')}" oninput="onFrom()">
+ <label class="lb">Nereye</label><input class="fld" id="f-to" list="pl" placeholder="Varış noktası" value="${esc(s.to||'')}">
+ <datalist id="pl">${AL.map(a=>`<option value="${a[1]}">`).join('')}</datalist>
+ <div id="fl-w" style="display:none"><label class="lb">Uçuş numarası (rötar takibi için)</label><input class="fld" id="f-fl" placeholder="örn. TK1234"></div>
+ <div class="two"><div style="flex:1"><label class="lb">Tarih</label><input class="fld" type="date" id="f-date" min="${today}" value="${s.date||''}"></div><div style="flex:1"><label class="lb">Saat</label><input class="fld" type="time" id="f-time" value="${s.time||''}"></div></div>
+ <div class="two"><div class="sp"><span>👥 Yolcu</span><div><button onclick="stp('pax',-1)">−</button><b id="v-pax">${pax}</b><button onclick="stp('pax',1)">+</button></div></div><div class="sp"><span>🧳 Bavul</span><div><button onclick="stp('lug',-1)">−</button><b id="v-lug">${lug}</b><button onclick="stp('lug',1)">+</button></div></div></div>
+ <div class="vp" id="vp"></div>
+ <label class="lb">Ek istekler</label><div class="tiles">${EX.map((e,i)=>`<button class="tile${extras.has(e[1])?' on':''}" onclick="tgx(this,'${e[1]}')"><i>${e[0]}</i>${e[1]}</button>`).join('')}</div>
+ <div class="seg"><button class="${way=='Tek yön'?'on':''}" onclick="setWay(this,'Tek yön')">Tek yön</button><button class="${way!='Tek yön'?'on':''}" onclick="setWay(this,'Gidiş-dönüş')">Gidiş-dönüş</button></div>
+ <button class="btn" id="go" onclick="go()">Uygun Aracı Ara</button></div>`,'card');
+ onFrom();vp()}
+function vp(){const v=vinfo(pax);$('vp').innerHTML=`<i>${v[0]}</i><div><b>${v[1]}</b><small>${v[2]} için önerilen araç</small></div>`}
+function stp(k,d){if(k=='pax'){pax=Math.max(1,Math.min(60,pax+d));$('v-pax').textContent=pax;vp()}else{lug=Math.max(0,Math.min(60,lug+d));$('v-lug').textContent=lug}}
+function tgx(b,n){b.classList.toggle('on');extras.has(n)?extras.delete(n):extras.add(n)}
+function setWay(b,w){way=w;b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x==b))}
+function onFrom(){$('fl-w').style.display=/havalimanı|sabiha/i.test($('f-from').value)?'block':'none'}
+function go(){let bad=0;['f-from','f-to','f-date','f-time'].forEach(id=>{const e=$(id),x=!e.value.trim();e.classList.toggle('bad',x);bad|=x});if(bad)return;
+ const g=id=>$(id).value.trim();
+ T={from:g('f-from'),to:g('f-to'),date:g('f-date').split('-').reverse().join('.')+' '+g('f-time'),pax:pax+' yolcu',n:pax,lug:lug+' bavul',way,extra:[...extras].join(', ')||'Yok',flight:g('f-fl'),iso:g('f-date')+'T'+g('f-time')};
+ $('tf').style.pointerEvents='none';$('tf').style.opacity=.55;$('go').remove();mode='wait';add(routeCard(),'card');search()}
+function routeCard(){return `<div class="rt"><div class="rp"><span class="d"></span><div class="ln"><i>${vinfo(T.n)[0]}</i></div><span class="d b"></span></div><div class="rn"><b>${esc(T.from)}</b><b>${esc(T.to)}</b></div><div class="rc"><span>📅 ${T.date}</span><span>👥 ${T.n}</span><span>🧳 ${lug}</span>${T.way!='Tek yön'?'<span>🔁 Gidiş-dönüş</span>':''}</div></div>`}
+function search(){step(2);
+ bot('Harika! Anlaşmalı, sigortalı ve yetki belgeli firmalar arasında size uygun aracı arıyorum…',null,()=>{
+  add(`<h4>Size uygun araç aranıyor</h4><div id="ps" style="font-size:13px;color:var(--mu)">Firmalar taranıyor…</div><div class="bar"><i id="pb"></i></div>
+  <div class="tg"><div>🔔 <b>Araç bulununca bana bildirim gönder</b><br><small style="color:var(--mu)">Sayfa açıkken haber verelim</small></div><div class="sw" id="sw"></div></div>`,'card');
+  $('sw').onclick=async()=>{notify=!notify;$('sw').classList.toggle('on',notify);
+   if(notify&&'Notification' in window&&Notification.permission==='default'){try{await Notification.requestPermission()}catch(e){}}};
+  const msgs=['Firmalar taranıyor…','Müsait araçlar kontrol ediliyor…','Belgeler ve sigorta doğrulanıyor…','Fiyat teklifi hazırlanıyor…'];let p=0;
+  const iv=setInterval(()=>{p++;$('pb').style.width=p*25+'%';$('ps').textContent=msgs[Math.min(p,3)];if(p>=4){clearInterval(iv);found()}},1100)})}
+const FLEET={
+ s:[{n:'Mercedes-Benz Vito VIP',c:'Boğaz VIP Turizm',cap:'7 yolcu + 7 bavul',pr:3300,pl:'34 TRS 421',dr:'Murat K.',ic:'🚐',r:'4.9 ★ (312 transfer)'},
+    {n:'Volkswagen Caravelle',c:'Marmara Transfer',cap:'8 yolcu + 8 bavul',pr:3600,pl:'34 MRM 087',dr:'Serkan A.',ic:'🚐',r:'4.8 ★ (204 transfer)'}],
+ m:[{n:'Mercedes-Benz Sprinter VIP (16 kişilik)',c:'Anadolu Grup Turizm',cap:'16 yolcu + 16 bavul',pr:5200,pl:'34 AGT 316',dr:'Hakan Y.',ic:'🚌',r:'4.9 ★ (178 transfer)'},
+    {n:'Mercedes-Benz Sprinter Tourer (16 kişilik)',c:'Galata Seyahat',cap:'16 yolcu + 14 bavul',pr:5600,pl:'34 GLT 612',dr:'Ali R.',ic:'🚌',r:'4.7 ★ (143 transfer)'}],
+ l:[{n:'Isuzu Novo Lux (21 kişilik)',c:'Lale Turizm',cap:'21 yolcu + 21 bavul',pr:7800,pl:'34 LLT 021',dr:'Kemal T.',ic:'🚍',cap2:21,r:'4.8 ★ (96 transfer)'},
+    {n:'BMC Belde (25 kişilik)',c:'Bosfor Tur',cap:'25 yolcu + 25 bavul',pr:9200,pl:'34 BSF 025',dr:'Osman D.',ic:'🚍',cap2:25,r:'4.7 ★ (81 transfer)'}]};
+let vi=0,cur=null;
+function pickVeh(){const nums=(String(T.pax).match(/\d+/g)||[]).map(Number);let n=nums.length?Math.max(...nums):4;
+ const tier=n<=8?'s':n<=16?'m':'l';let v=Object.assign({},FLEET[tier][vi%2]);v.n_=n;
+ if(tier==='l'&&n>v.cap2){const k=Math.ceil(n/v.cap2);v.qty=k;v.n=k+' × '+v.n;v.pr*=k;v.cap=n+' yolcu ('+k+' araç)';v.pl=v.pl+' ve diğerleri'}
+ if(/dönüş/i.test(T.way||''))v.pr=Math.round(v.pr*1.8/10)*10;return v}
+function seats(){const cap=parseInt(cur.cap)||T.n;return Array.from({length:Math.min(cap,60)},(_,i)=>`<i class="${i<T.n?'f':''}" style="animation-delay:${i*40}ms"></i>`).join('')+`<small>${T.n}/${cap} koltuk</small>`}
+const fm=x=>x.toLocaleString('tr-TR')+' ₺';
+function found(){cur=pickVeh();
+ if(notify){try{if(Notification.permission==='granted')new Notification('Turista Transfer',{body:'Size uygun aracı bulduk!'})}catch(e){}}
+ if(navigator.vibrate)navigator.vibrate(200);
+ bot(`${T.pax} için uygun araç buldum 🎉 Firmanın belgelerini ve sigortasını biz doğruladık.`,null,()=>{
+  const c=add(`<div class="car"><div><span>${cur.ic}</span>${cur.n}</div></div>
+  <div class="seats">${seats()}</div><div class="row"><span>Firma</span><b>${cur.c}</b></div><div class="row"><span>Kapasite</span><b>${cur.cap}</b></div><div class="row"><span>Puan</span><b>${cur.r}</b></div><div class="row"><span>Toplam Ücret</span><b style="color:var(--s);font-size:17px">${fm(cur.pr+150)}</b></div>
+  <div class="shield">ℹ️ Şu an örnek araç ve fiyat gösteriliyor. Gerçek firma eşleşmesi Turista Partner ile gelecek.</div><button class="btn" id="acc">Kabul Et</button><button class="btn alt" id="oth">Başka Araç Ara</button>`,'card');
+  $('acc').onclick=()=>{c.querySelectorAll('button').forEach(b=>b.remove());add('Kabul ediyorum','m me');passengers()};
+  $('oth').onclick=()=>{c.querySelectorAll('button').forEach(b=>b.remove());add('Başka araç arayın','m me');vi++;step(2);bot('Tamamdır, aynı kapasitede başka bir araç arıyorum…',null,()=>setTimeout(found,1500))}})}
+function passengers(){step(3);const n=T.n;
+ bot(`Süper! Sigorta ve şoför kaydı için <b>${n} yolcunun</b> bilgilerini girin.`,null,()=>{
+  let rows='';for(let i=0;i<n;i++)rows+=`<div class="pr"><div class="pn">${i+1}</div><div style="flex:1"><input class="fld pnm" placeholder="Ad Soyad" value="${i==0?esc(A.n||''):''}"><input class="fld ptc" placeholder="T.C. Kimlik No" inputmode="numeric" maxlength="11" oninput="this.value=this.value.replace(/\\D/g,'')"></div></div>`;
+  const c=add(`<h4>Yolcu Bilgileri</h4>${rows}<label class="lb">İletişim telefonu (şoför SMS’i için)</label><input class="fld" id="ph" placeholder="05xx xxx xx xx" inputmode="tel" value="${esc(A.p||'')}">
+  <div class="shield">🔒 Bilgileriniz yalnızca transfer sigortası ve şoför kaydı için kullanılır.</div><button class="btn" id="pc">Ödemeye Geç</button>`,'card');
+  $('pc').onclick=()=>{let bad=null;c.querySelectorAll('.pnm').forEach(e=>{const x=!/\S+\s+\S+/.test(e.value.trim());e.classList.toggle('bad',x);if(x&&!bad)bad=e});
+   c.querySelectorAll('.ptc').forEach(e=>{const x=!/^[1-9]\d{10}$/.test(e.value);e.classList.toggle('bad',x);if(x&&!bad)bad=e});
+   const ph=$('ph'),px=ph.value.replace(/\D/g,'').length<10;ph.classList.toggle('bad',px);if(px&&!bad)bad=ph;
+   if(bad){bad.scrollIntoView({block:'center',behavior:'smooth'});return}
+   c.style.pointerEvents='none';c.style.opacity=.55;T.people=[...c.querySelectorAll('.pnm')].map((e,i)=>({n:e.value.trim(),tc:c.querySelectorAll('.ptc')[i].value}));T.phone=$('ph').value.trim();$('pc').remove();add('Bilgiler tamam','m me');pay()}})}
+function pay(){const tot=fm(cur.pr+150);
+ bot('Son adım! Ödemeniz <b>Turista güvencesinde</b> tutulur; transfer başarıyla tamamlanınca firmaya aktarılır.',null,()=>{
+  const c=add(`<h4>Güvenli Ödeme (demo)</h4>
+  <div class="row"><span>Araç</span><b>${cur.n}</b></div><div class="row"><span>Rota</span><b>${esc(T.from)} → ${esc(T.to)}</b></div><div class="row"><span>Tarih</span><b>${T.date}</b></div>
+  <div class="row"><span>Transfer</span><b>${fm(cur.pr)}</b></div><div class="row"><span>Garanti hizmeti</span><b>150 ₺</b></div><div class="row"><span>Toplam</span><b style="color:var(--s);font-size:17px">${tot}</b></div>
+  <input class="fld" placeholder="Kart üzerindeki isim"><input class="fld" placeholder="Kart numarası" inputmode="numeric" maxlength="19"><div class="two"><input class="fld" placeholder="AA/YY" maxlength="5"><input class="fld" placeholder="CVV" maxlength="3" inputmode="numeric"></div>
+  <div class="shield">🛡️ Transfer gerçekleşmezse veya araç anlaşılan gibi gelmezse ücretin tamamı iade edilir.</div>
+  <button class="btn" id="pay">${tot} Güvenle Öde</button>`,'card');
+  $('pay').onclick=()=>{$('pay').disabled=true;$('pay').textContent='İşleniyor…';setTimeout(async()=>{const sv=await saveBooking();if(!sv.ok){alert('Rezervasyon kaydedilemedi: '+sv.err);$('pay').disabled=false;$('pay').textContent='Tekrar dene';return}c.style.pointerEvents='none';c.style.opacity=.55;$('pay').remove();
+   const ov=add(`<div class="ok"><svg viewBox="0 0 52 52"><circle class="c" cx="26" cy="26" r="24"/><path class="k" d="M14 27l8 8 16-17"/></svg><h3>Rezervasyon Alındı</h3><div class="no">Rezervasyon no: <b>TT-${sv.no}</b></div><p>Şoför bilgileri SMS olarak tarafınıza yönlendirilecektir.</p></div>`,'card okc');
+   if(navigator.vibrate)navigator.vibrate([60,40,120])},1400)}})}
+$('send').onclick=()=>submit();inp.onkeydown=e=>{if(e.key==='Enter')submit()};
+</script>
+</body>
+</html>

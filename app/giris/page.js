@@ -18,7 +18,7 @@ export default function Giris() {
     if (mode === "login") {
       const { error } = await supabase.auth.signInWithPassword({ email: f.email, password: f.password });
       if (error) setMsg("E-posta veya şifre hatalı. Kontrol edip tekrar deneyin.");
-      else router.push("/talep");
+      else router.push("/");
     } else {
       const { data, error } = await supabase.auth.signUp({
         email: f.email,
@@ -27,7 +27,7 @@ export default function Giris() {
       });
       if (error) setMsg("Kayıt tamamlanamadı: " + error.message);
       else if (!data.session) setMsg("Kayıt alındı. E-postanıza gelen doğrulama bağlantısına tıklayın, sonra giriş yapın.");
-      else router.push("/talep");
+      else router.push("/");
     }
     setBusy(false);
   }
