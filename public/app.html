@@ -216,8 +216,13 @@ $('routes').innerHTML=TL.map((t,i)=>`<div class="big" style="background:${t[3]}"
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x==b));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id=='v-'+b.dataset.t))});
 const SB=supabase.createClient('https://fzobhmgfmqrfqvoxzalx.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ6b2JobWdmbXFyZnF2b3h6YWx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwODA2NjIsImV4cCI6MjEwNzY1NjY2Mn0.4pAtaRBjAB1Xre5yEaeAE7FY6GD02zzBZTj_u_3nF3w');
 let A={},UID=null;
-(async()=>{const {data}=await SB.auth.getSession();if(!data.session){location.href='/giris';return}
- const u=data.session.user;UID=u.id;
+(async()=>{
+ const {data}=await SB.auth.getSession();let sess=data&&data.session;
+ if(!sess){try{const k=Object.keys(localStorage).find(x=>/^sb-.*-auth-token$/.test(x));
+  if(k){const o=JSON.parse(localStorage.getItem(k));const t=o&&(o.currentSession||o);
+   if(t&&t.access_token&&t.refresh_token){const r=await SB.auth.setSession({access_token:t.access_token,refresh_token:t.refresh_token});sess=r.data&&r.data.session}}}catch(e){}}
+ if(!sess){document.body.innerHTML='<div style="font-family:system-ui;max-width:420px;margin:15vh auto;padding:24px;text-align:center"><h2>Oturum bulunamadı</h2><p style="color:#64748b;margin:12px 0">Lütfen giriş yapın. Giriş yaptığınız halde bu ekranı görüyorsanız şu bilgiyi bana yazın:<br><b>'+(Object.keys(localStorage).filter(x=>x.startsWith('sb-')).join(', ')||'kayıtlı oturum yok')+'</b></p><a href="/giris" style="display:inline-block;background:#D4AF37;color:#0A2342;padding:12px 22px;border-radius:14px;font-weight:700;text-decoration:none">Giriş sayfasına git</a></div>';return}
+ const u=sess.user;UID=u.id;
  const {data:p}=await SB.from('profiles').select('full_name,phone').eq('id',u.id).maybeSingle();
  A={n:(p&&p.full_name)||'',p:(p&&p.phone)||'',e:u.email||''};showAcc();})();
 async function logout(){await SB.auth.signOut();location.href='/giris'}
