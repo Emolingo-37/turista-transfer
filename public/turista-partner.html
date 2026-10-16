@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Turista Partner · Bağlantılı Demo</title>
+<style>
+:root{--p:#0A2342;--s:#13315C;--g:#D4AF37;--v:#6D5BD0;--bg:#F8FAFC;--tx:#0f172a;--mu:#64748b}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",system-ui,sans-serif;background:linear-gradient(160deg,var(--p),var(--s));display:flex;align-items:center;justify-content:center;color:var(--tx);-webkit-font-smoothing:antialiased}
+button,input,select{font-family:inherit}
+.app{width:100%;max-width:430px;height:100%;max-height:900px;background:var(--bg);position:relative;overflow:hidden;display:flex;flex-direction:column}
+@media(min-width:500px){.app{height:92vh;aspect-ratio:9/16;border-radius:34px;box-shadow:0 30px 80px #0008}}
+#splash{position:absolute;inset:0;z-index:90;background:linear-gradient(160deg,var(--p),var(--s) 70%,#2a2468);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;transition:opacity .6s,visibility .6s}
+#splash.hide{opacity:0;visibility:hidden}
+.lg{width:92px;height:92px;border-radius:28px;background:var(--g);color:var(--p);font-size:48px;font-weight:800;display:grid;place-items:center;animation:pulse 1.6s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 28px #D4AF3700}0%{box-shadow:0 0 0 0 #D4AF3780}}
+#splash h1{margin-top:22px;font-size:28px;letter-spacing:-.02em}#splash p{color:#cbd5e1;margin-top:6px;font-size:14px}
+.view{flex:1;overflow-y:auto;padding:18px 18px 104px;display:none}.view.on{display:block}
+h2{font-size:26px;letter-spacing:-.02em}.sub{color:var(--mu);font-size:14px;margin-top:4px}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.bell{position:relative;width:44px;height:44px;border-radius:50%;border:1px solid #e2e8f0;background:#fff;font-size:20px;cursor:pointer}
+.bell i{position:absolute;top:-3px;right:-3px;min-width:20px;height:20px;border-radius:99px;background:var(--g);color:var(--p);font-weight:800;font-size:11px;line-height:20px;font-style:normal;text-align:center;padding:0 5px}
+.sec{font-size:17px;font-weight:700;margin:24px 0 10px;display:flex;justify-content:space-between;align-items:baseline}.sec small{font-size:13px;color:var(--v);font-weight:600;cursor:pointer}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:16px;box-shadow:0 6px 20px #0a234610}
+.on-card{margin-top:16px;display:flex;align-items:center;gap:12px;background:radial-gradient(circle at 92% 0%,#6D5BD038,transparent 55%),radial-gradient(circle at 0 105%,#D4AF3750,transparent 50%),#fff;border:1px solid #ece8fb;border-radius:26px;padding:16px 18px}
+.on-card div{flex:1}.on-card b{font-size:16px}.on-card small{display:block;color:var(--mu);font-size:12.5px;margin-top:2px;line-height:1.35}
+.sw{width:48px;height:28px;border-radius:99px;background:#cbd5e1;position:relative;cursor:pointer;flex:none;transition:.2s;border:0}
+.sw:after{content:"";position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s}.sw.on{background:var(--g)}.sw.on:after{left:23px}
+.earn{margin-top:14px;background:linear-gradient(145deg,var(--p),var(--s) 65%,#3b2f8f);color:#fff;border-radius:28px;padding:20px}
+.earn small{color:#cbd5e1;font-size:12.5px}.earn .big{font-size:36px;font-weight:800;letter-spacing:-.03em;margin:2px 0 4px}
+.earn .hold{display:inline-block;background:#ffffff1c;border-radius:99px;padding:6px 12px;font-size:12px;font-weight:600}.earn .hold b{color:var(--g)}
+.bars{display:flex;align-items:flex-end;gap:8px;height:64px;margin-top:16px}.bars div{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;justify-content:flex-end;height:100%;font-size:10px;color:#94a3b8}
+.bars i{width:100%;border-radius:8px 8px 4px 4px;background:#ffffff26}.bars div:last-child i{background:var(--g)}
+.job{background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:16px;margin-bottom:12px;box-shadow:0 6px 20px #0a234610;animation:rise .45s cubic-bezier(.2,1.2,.4,1)}
+@keyframes rise{from{opacity:0;transform:translateY(16px) scale(.97)}}
+.job .hd{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tag{display:inline-block;background:#efeafd;color:var(--v);font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px}.tag.g{background:#fffbeb;color:#7a5c00}.tag.good{background:#dcfce7;color:#15803d}
+.job .price{font-size:20px;font-weight:800;color:var(--s);letter-spacing:-.02em}
+.rp{display:flex;align-items:center;gap:6px;margin:14px 0 4px}.rp .d{width:14px;height:14px;border-radius:50%;flex:none;border:3px solid var(--p);background:#fff}.rp .d.b{background:var(--g);border-color:var(--g);box-shadow:0 0 0 5px #D4AF3733}
+.ln{flex:1;border-top:2.5px dashed var(--g);height:0}
+.rn{display:flex;justify-content:space-between;gap:10px;font-size:15px;font-weight:700;letter-spacing:-.01em}.rn b:last-child{text-align:right}
+.rc{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.rc span{background:var(--bg);border-radius:99px;padding:6px 11px;font-size:12px;font-weight:600;color:var(--p)}
+.shield{background:#fffbeb;border:1px solid #f3dc84;border-radius:14px;padding:9px 12px;font-size:12px;color:#7a5c00;margin-top:12px;line-height:1.4}
+.two{display:flex;gap:8px}
+.btn{width:100%;border:0;background:var(--g);color:var(--p);padding:14px;border-radius:16px;font-size:15px;font-weight:800;margin-top:12px;cursor:pointer}
+.btn.alt{background:#fff;border:1.5px solid #cbd5e1;color:var(--mu);font-weight:600}.btn:disabled{opacity:.45;cursor:not-allowed}.two .btn{flex:1}
+.empty{text-align:center;color:var(--mu);font-size:14px;padding:34px 20px;line-height:1.5;background:#fff;border:1.5px dashed #cbd5e1;border-radius:24px}.empty b{display:block;font-size:34px;margin-bottom:6px}
+.seg{display:flex;background:#e9eef5;border-radius:14px;padding:4px;margin:16px 0}.seg button{flex:1;border:0;background:none;padding:10px 4px;border-radius:11px;font-weight:700;font-size:13px;color:var(--mu);cursor:pointer}.seg button.on{background:var(--p);color:#fff}
+.ts{display:flex;gap:14px;padding:8px 0}.ts em{font-style:normal;flex:none;width:40px;height:40px;border-radius:14px;background:#fff;border:2px solid var(--g);display:grid;place-items:center;font-size:18px}
+.ts b{font-size:15px}.ts small{display:block;color:var(--mu);font-size:12.5px;margin-top:2px;line-height:1.4}
+.prof{display:flex;align-items:center;gap:14px;background:linear-gradient(145deg,var(--p),var(--s));color:#fff;border-radius:26px;padding:18px;margin-top:16px}
+.av{width:58px;height:58px;border-radius:50%;background:var(--g);color:var(--p);font-weight:800;font-size:22px;display:grid;place-items:center;flex:none}
+.prof b{font-size:18px}.prof small{display:block;color:#cbd5e1;font-size:13px;margin-top:2px}
+.lst{background:#fff;border:1px solid #e2e8f0;border-radius:22px;margin-top:10px;overflow:hidden}
+.li{display:flex;align-items:center;gap:12px;padding:14px 16px;font-size:15px;border-bottom:1px solid #f1f5f9}.li:last-child{border:0}
+.li em{font-style:normal;width:32px;height:32px;border-radius:10px;background:#efeafd;display:grid;place-items:center;flex:none}.li span{flex:1}.li small{color:var(--mu);font-size:12.5px}
+.fld{width:100%;border:1.5px solid #e2e8f0;border-radius:14px;padding:12px;font-size:15px;margin-top:8px;background:#fff;outline:none}.fld:focus{border-color:var(--g)}
+.lb{display:block;font-size:12px;font-weight:600;color:var(--mu);margin-top:10px}
+.apply{display:block;width:100%;text-align:left;border:0;cursor:pointer;margin-top:16px;color:#fff;border-radius:26px;padding:18px;background:radial-gradient(circle at 95% 0%,#D4AF3760,transparent 55%),linear-gradient(145deg,var(--p),var(--s) 65%,#3b2f8f)}
+.apply b{font-size:17px;display:block}.apply small{display:block;color:#cbd5e1;font-size:12.5px;margin:4px 0 12px;line-height:1.4}
+.bar{height:8px;background:#ffffff26;border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--g),#f3dc84);transition:width .4s}
+nav{position:absolute;left:0;right:0;bottom:0;display:flex;background:#ffffffee;backdrop-filter:blur(16px);border-top:1px solid #e2e8f0;padding:8px 8px max(10px,env(safe-area-inset-bottom));z-index:10}
+nav button{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:600;color:#94a3b8;cursor:pointer;padding:4px;position:relative}
+nav button b{font-size:22px;filter:grayscale(1) opacity(.6)}nav button.on{color:var(--p)}nav button.on b{filter:none}
+nav button i{position:absolute;top:0;left:56%;background:var(--g);color:var(--p);font-weight:800;font-size:10px;line-height:16px;font-style:normal;min-width:16px;border-radius:99px;text-align:center;padding:0 4px}
+#sheet{position:absolute;inset:0;z-index:40;background:var(--bg);display:none;flex-direction:column}#sheet.on{display:flex}
+.sh{background:var(--p);color:#fff;padding:12px 16px 16px;padding-top:max(12px,env(safe-area-inset-top))}
+.sh .t{display:flex;align-items:center;gap:10px}.sh .t button{border:0;background:#ffffff20;color:#fff;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer}
+.sh b{font-size:16px}.sh small{display:block;color:#cbd5e1;font-size:11.5px}.sh .bar{margin-top:14px}
+#sb{flex:1;overflow-y:auto;padding:16px 16px 28px}
+.ck{display:flex;gap:12px;background:#fff;border:1.5px solid #e2e8f0;border-radius:20px;padding:14px;margin-bottom:10px;cursor:pointer;transition:.2s}
+.ck.on{border-color:var(--g);background:#fffdf3}
+.ck .bx{width:26px;height:26px;border-radius:9px;border:2px solid #cbd5e1;flex:none;display:grid;place-items:center;color:transparent;font-weight:800;font-size:14px;margin-top:1px}.ck.on .bx{background:var(--g);border-color:var(--g);color:var(--p)}
+.ck b{font-size:14.5px;line-height:1.3;display:block}.ck small{display:block;color:var(--mu);font-size:12.5px;line-height:1.45;margin-top:4px}
+.note{font-size:11.5px;color:var(--mu);line-height:1.5;margin-top:6px;text-align:center}
+.ok{text-align:center;padding:26px 6px}.ok svg{width:96px;height:96px}.ok .c{fill:#dcfce7;stroke:#22c55e;stroke-width:2.5;stroke-dasharray:151;stroke-dashoffset:151;animation:dr .7s .1s forwards}
+.ok .k{fill:none;stroke:#16a34a;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;animation:dr .5s .7s forwards}
+@keyframes dr{to{stroke-dashoffset:0}}.ok h3{font-size:22px;margin-top:10px;color:#15803d}.ok p{font-size:14px;margin-top:8px;line-height:1.5;color:var(--mu)}
+#ban{position:absolute;left:12px;right:12px;top:12px;z-index:80;background:#ffffffee;backdrop-filter:blur(18px);border:1px solid #e2e8f0;border-radius:22px;padding:12px 14px;display:flex;gap:12px;align-items:center;box-shadow:0 16px 40px #0a234640;transform:translateY(-130%);transition:transform .45s cubic-bezier(.2,1.1,.4,1);cursor:pointer}
+#ban.show{transform:none}#ban i{font-style:normal;width:42px;height:42px;border-radius:14px;background:var(--g);display:grid;place-items:center;font-size:20px;flex:none}
+#ban b{font-size:14px;display:block}#ban small{font-size:12.5px;color:var(--mu)}
+#toast{position:absolute;left:50%;bottom:96px;transform:translate(-50%,20px);background:var(--p);color:#fff;padding:11px 18px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:.3s;z-index:85;pointer-events:none;white-space:nowrap}#toast.show{opacity:1;transform:translate(-50%,0)}
+:focus-visible{outline:2.5px solid var(--g);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.brand,.me,.kpis{display:none}.cols{display:block}
+@media(min-width:1024px){
+body{background:var(--bg)}
+.app{max-width:none;max-height:none;height:100vh;aspect-ratio:auto;border-radius:0;box-shadow:none;flex-direction:row}
+nav{position:relative;order:-1;flex:none;width:260px;flex-direction:column;gap:6px;padding:26px 16px 20px;background:linear-gradient(175deg,var(--p),var(--s) 75%,#2a2468);border:0;backdrop-filter:none}
+.brand{display:flex;align-items:center;gap:12px;color:#fff;padding:2px 10px 26px}.brand b{font-size:17px;display:block}.brand small{color:#94a3b8;font-size:12px}
+.lg2{width:44px;height:44px;border-radius:14px;background:var(--g);color:var(--p);font-weight:800;font-size:24px;display:grid;place-items:center}
+nav button{flex:none;flex-direction:row;justify-content:flex-start;gap:12px;font-size:15px;color:#cbd5e1;padding:13px 14px;border-radius:16px;transition:.15s}
+nav button b{font-size:20px;filter:none}nav button:hover{background:#ffffff14}nav button.on{background:var(--g);color:var(--p)}nav button i{position:static;margin-left:auto}
+.me{display:flex;align-items:center;gap:10px;margin-top:auto;padding:12px;border-radius:18px;background:#ffffff14;color:#fff;cursor:pointer}.me .av{width:40px;height:40px;font-size:16px}.me b{font-size:14px;display:block}.me small{font-size:12px;color:#94a3b8}
+.view{padding:32px max(44px,calc((100% - 1240px)/2)) 48px}h2{font-size:30px}
+#v-home.on{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);column-gap:28px;align-content:start}
+#v-home>*{grid-column:1/-1}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:22px}
+.kp{background:#fff;border:1px solid #e2e8f0;border-radius:22px;padding:16px 18px;display:flex;align-items:center;gap:14px}.kp i{font-style:normal;width:44px;height:44px;border-radius:14px;background:#efeafd;display:grid;place-items:center;font-size:20px}.kp b{font-size:24px;display:block;letter-spacing:-.02em}.kp small{color:var(--mu);font-size:12.5px}
+#v-home>.earn{grid-column:1;grid-row:3}#v-home>.on-card{grid-column:2;grid-row:3}
+#v-home>:nth-child(5){grid-column:1;grid-row:4}#v-home>:nth-child(6){grid-column:1;grid-row:5}#v-home>:nth-child(7){grid-column:2;grid-row:4}#v-home>:nth-child(8){grid-column:2;grid-row:5}
+#v-home>:nth-child(9){grid-row:6}#v-home>:nth-child(10){grid-row:7;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+#v-home>.sec{margin-top:28px}.bars{height:110px}.earn .big{font-size:44px}
+#jl{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:16px;align-items:start}#jl .job{margin-bottom:0}#jl .empty{grid-column:1/-1}.seg{max-width:440px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:start}.cols>div:nth-child(2)>.sec:first-child{margin-top:16px}
+#sheet{left:auto;width:540px;box-shadow:-24px 0 60px #0a234655;animation:sl .35s cubic-bezier(.2,1,.3,1)}@keyframes sl{from{transform:translateX(60px);opacity:0}}
+#ban{left:auto;right:28px;top:24px;width:400px;transform:translateY(-250%)}#toast{bottom:32px}
+.job:hover{box-shadow:0 14px 34px #0a234620}.ck:hover{border-color:var(--g)}
+}
+/* Connected demo refinements */
+@media(min-width:1024px){nav{width:238px}.view{padding:28px clamp(24px,3.7vw,62px) 45px}#v-home.on{grid-template-columns:minmax(0,1.55fr) minmax(280px,1fr)}}
+.view.on{animation:partnerIn .24s cubic-bezier(.22,1,.36,1) both}@keyframes partnerIn{from{opacity:.5;transform:translateY(7px)}to{opacity:1;transform:none}}.demo-ribbon{padding:11px 15px;font-size:12px;background:#fff8dd;color:#765500;border:1px solid #eedb9d;border-radius:15px;margin:13px 0;line-height:1.5}.demo-price{width:100%;margin-top:12px;padding:12px;font-size:15px;border-radius:12px;border:1px solid #d0dbe6}.demo-link{display:block;margin:12px 0;font-size:13px;color:#13315c;font-weight:700}#jl .job{min-width:0}@media(prefers-reduced-motion:reduce){.view.on{animation:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<div id="splash"><div class="lg">T</div><h1>Turista Partner</h1><p>İş ortakları için güvenli iş akışı</p></div>
+<div id="ban" onclick="openNew()" role="button"><i>🔔</i><div><b id="bt">Yeni iş talebi</b><small id="bs"></small></div></div>
+<div id="toast"></div>
+
+<section class="view on" id="v-home">
+  <div class="top"><div><h2 id="hi">Merhaba 👋</h2><div class="sub">İşlerinizi ve kazancınızı buradan yönetin.</div></div><button class="bell" onclick="openNew()" aria-label="Bildirimler">🔔<i id="bb"></i></button></div>
+  <div class="demo-ribbon">🧪 Demo ortamı · Talep ve teklifler aynı tarayıcıda paylaşılır. Gerçek SMS ve ödeme yapılmaz. <a href="/app.html" target="_blank" rel="noopener" class="demo-link">↗ Müşteri ekranını aç</a></div><div class="kpis" id="kp"></div><div class="on-card"><div><b id="avt">Müsaitsiniz</b><small id="avs">Yeni transfer talepleri size bildirilir.</small></div><button class="sw on" id="av-sw" onclick="toggleAvail()" aria-label="Müsaitlik"></button></div>
+  <div class="earn"><small>Bu ay kazancınız</small><div class="big" id="em">0 ₺</div><span class="hold">🛡️ Güvencede bekleyen <b id="eh">0 ₺</b></span>
+    <div class="bars" id="bars"></div></div>
+  <div class="sec">Sıradaki transfer</div><div id="next"></div>
+  <div class="sec">Yeni talepler <small onclick="goTab('jobs')">Tümü</small></div><div id="hnew"></div>
+  <div class="sec">Nasıl çalışır?</div>
+  <div>
+   <div class="ts"><em>🔔</em><div><b>Talep anında gelir</b><small>Aracınıza uygun bir müşteri geldiğinde bildirim alırsınız.</small></div></div>
+   <div class="ts"><em>🤝</em><div><b>Kabul edin, anlaşın</b><small>Rota, saat ve net ücret baştan nettir; pazarlık yok.</small></div></div>
+   <div class="ts"><em>🚐</em><div><b>Şoför ve plakayı iletin</b><small>Bilgi müşteriye SMS ile gider.</small></div></div>
+   <div class="ts"><em>💸</em><div><b>Ödeme güvencede</b><small>Transfer bitince tutar hesabınıza aktarılır.</small></div></div>
+  </div>
+</section>
+
+<section class="view" id="v-jobs"><h2>İşler</h2><div class="demo-ribbon">Bu sayfada gerçek müşteri talebi bulunmaz; örnek işler ve bu tarayıcıdan oluşturulan demo talepleri gösterilir.</div><div class="sub">Talepleri kabul edin, transferleri takip edin.</div>
+  <div class="seg" id="seg"><button class="on" data-s="new">Yeni</button><button data-s="ok">Onaylı</button><button data-s="done">Tamamlanan</button></div><div id="jl"></div></section>
+
+<section class="view" id="v-acc">
+  <h2>Hesap</h2>
+  <div class="cols"><div>
+  <div class="prof"><div class="av" id="av">T</div><div><b id="pn">Firmanız</b><small id="pm">Bilgilerinizi ekleyin</small></div></div>
+  <button class="apply" onclick="openSheet()"><b>İş ortağı başvurusu</b><small id="as">Acenta veya taşıma firması olarak başvurun. Gereken belgeleri adım adım hazırlayın.</small><div class="bar"><i id="ap" style="width:0"></i></div></button>
+  <div class="sec" style="margin-top:22px">Firma bilgileri</div>
+  <label class="lb">Firma unvanı</label><input class="fld" id="f-c" placeholder="Örn. Boğaz VIP Turizm Ltd. Şti.">
+  <label class="lb">Yetkili ad soyad</label><input class="fld" id="f-n" placeholder="Ad Soyad">
+  <label class="lb">Telefon</label><input class="fld" id="f-p" placeholder="05xx xxx xx xx" inputmode="tel">
+  <label class="lb">E-posta</label><input class="fld" id="f-e" placeholder="firma@ornek.com" inputmode="email">
+  <div class="two"><div style="flex:1"><label class="lb">Şehir</label><input class="fld" id="f-s" placeholder="İstanbul"></div><div style="flex:1"><label class="lb">Araç sayısı</label><input class="fld" id="f-a" placeholder="4" inputmode="numeric"></div></div>
+  <button class="btn" id="sv" onclick="saveAcc()">Kaydet</button>
+  </div><div>
+  <div class="sec">Bildirimler</div>
+  <div class="lst" id="ns"></div>
+  <div class="sec">Destek</div>
+  <div class="lst">
+    <div class="li"><em>💸</em><span>Ödemeler ve IBAN</span><small>›</small></div>
+    <div class="li"><em>🛡️</em><span>Turista güvence programı</span><small>›</small></div>
+    <div class="li"><em>❓</em><span>Yardım ve iletişim</span><small>›</small></div>
+    <div class="li"><em>📄</em><span>İş ortağı sözleşmesi</span><small>›</small></div>
+  </div>
+  <div style="text-align:center;color:var(--mu);font-size:12px;margin-top:18px">Turista Partner v1.0</div>
+  </div></div>
+</section>
+
+<nav><div class="brand"><div class="lg2">T</div><div><b>Turista Partner</b><small>Acenta paneli</small></div></div><button class="on" data-t="home"><b>🏠</b>Ana Sayfa</button><button data-t="jobs"><b>📋</b>İşler<i id="nb" style="display:none"></i></button><button data-t="acc"><b>👤</b>Hesap</button><div class="me" onclick="goTab('acc')"><div class="av" id="sav">T</div><div><b id="sn">Firmanız</b><small id="sm">Hesabı düzenle</small></div></div></nav>
+
+<div id="sheet"><div class="sh"><div class="t"><button onclick="closeSheet()" aria-label="Geri">‹</button><div><b>İş ortağı başvurusu</b><small id="sst">Belgelerinizi hazırlayın, işaretleyin</small></div></div><div class="bar"><i id="sp" style="width:0"></i></div></div><div id="sb"></div></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const fm=x=>x.toLocaleString('tr-TR')+' ₺';
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+let ST={acc:{},ns:{new:1,push:1,sms:1,mail:0,quiet:0},ck:{},typ:'a',sent:0,avail:1};
+try{Object.assign(ST,JSON.parse(localStorage.getItem('tp_state')||'{}'))}catch(e){}
+function persist(){try{localStorage.setItem('tp_state',JSON.stringify(ST))}catch(e){}}
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('show'),2200)}
+
+/* ---- İşler ---- */
+let J=[
+ {id:1,st:'new',from:'İstanbul Havalimanı',to:'Sultanahmet',when:'Yarın 09:30',pax:3,lug:4,veh:'Vito / Caravelle',net:2900,cu:'Zeynep A.'},
+ {id:2,st:'new',from:'Sabiha Gökçen',to:'Sapanca',when:'13 Eki 14:00',pax:12,lug:12,veh:'Sprinter 16 kişilik',net:4700,cu:'Kemal D.'},
+ {id:3,st:'ok',from:'Taksim',to:'İstanbul Havalimanı',when:'12 Eki 05:30',pax:2,lug:3,veh:'Vito / Caravelle',net:2500,cu:'Elif S.',pl:'34 TRS 421',dr:'Murat K.',sent:1},
+ {id:4,st:'ok',from:'Ayasofya',to:'Bursa',when:'16 Eki 07:45',pax:6,lug:6,veh:'Vito / Caravelle',net:3900,cu:'Can Y.'},
+ {id:5,st:'done',from:'Antalya Havalimanı',to:'Kemer',when:'9 Eki',pax:4,lug:5,veh:'Vito / Caravelle',net:2300,cu:'Ali R.',paid:1},
+ {id:6,st:'done',from:'Kapadokya',to:'Nevşehir Havalimanı',when:'5 Eki',pax:16,lug:16,veh:'Sprinter 16 kişilik',net:3600,cu:'Selin T.',paid:0}];
+let tab='new';
+const DEMO_KEY='turista_live_demo_v1';
+function demoRead(){try{return JSON.parse(localStorage.getItem(DEMO_KEY)||'[]')}catch(e){return []}}
+function combined(){return [...demoRead().filter(x=>x.status!=='cancelled').map(x=>({id:x.id,demo:true,st:x.status==='confirmed'?'ok':'new',from:x.from,to:x.to,when:x.when,pax:x.pax,lug:x.luggage,veh:x.category,net:x.selected?.price||x.offers?.[0]?.price||0,offers:x.offers||[],company:x.selected?.company||'',selected:x.selected})),...J]}
+function sendDemoOffer(id){const p=document.getElementById('demo-price-'+id),price=Number(p?.value);if(!Number.isFinite(price)||price<1||price>1000000){toast('Geçerli demo teklif tutarı girin');return}const data=demoRead(),j=data.find(x=>x.id===id);if(!j||j.status!=='new'){toast('Bu talep artık açık değil');return}j.offers=j.offers||[];j.offers.push({company:ST.acc.c||'Turista Demo Filo',vehicle:j.category,price,created:Date.now()});localStorage.setItem(DEMO_KEY,JSON.stringify(data));render();toast('Demo teklifi müşteriye iletildi')}
+
+function jobCard(j,ro){
+ if(j.demo){const done=j.st==='ok';return `<div class="job"><div class="hd"><span class="tag ${done?'good':'g'}">${done?'✓ Müşteri onayladı':'🟡 Müşteri talebi · DEMO'}</span><span class="price">${j.net?fm(j.net):'Teklif bekleniyor'}</span></div><div class="rp"><span class="d"></span><div class="ln"></div><span class="d b"></span></div><div class="rn"><b>${esc(j.from)}</b><b>${esc(j.to)}</b></div><div class="rc"><span>📅 ${esc(j.when)}</span><span>👥 ${j.pax} yolcu</span><span>🧳 ${j.lug} bavul</span><span>🚐 ${esc(j.veh)}</span></div>${done?'<div class="shield" style="background:#f0fdf4;border-color:#bbf7d0">Müşteri demo teklifi kabul etti. Gerçek rezervasyon veya ödeme oluşturulmadı.</div>':ro?'<div class="shield">Partner ekranından fiyat teklifi verebilirsiniz.</div>':`<label class="lb">Fiyat teklifi (₺)</label><input class="demo-price" id="demo-price-${j.id}" type="number" min="1" max="1000000" placeholder="Örn. 3500"><button class="btn" onclick="sendDemoOffer('${j.id}')">Müşteriye teklif gönder · demo</button><div class="note">${j.offers.length} teklif gönderildi</div>`}</div>`}
+ const act=ro?'':j.st=='new'?`<div class="two"><button class="btn alt" onclick="decline(${j.id})">Reddet</button><button class="btn" onclick="accept(${j.id})">Kabul et</button></div>`
+ :j.st=='ok'?(j.sent?`<div class="shield" style="background:#f0fdf4;border-color:#bbf7d0;color:#15803d">✓ Şoför bilgisi müşteriye SMS ile iletildi: ${esc(j.dr)} · ${esc(j.pl)}</div><button class="btn" onclick="finish(${j.id})">Transferi tamamla</button>`
+ :`<label class="lb">Şoför adı</label><input class="fld" id="dr${j.id}" placeholder="Ad Soyad"><label class="lb">Plaka</label><input class="fld" id="pl${j.id}" placeholder="34 ABC 123"><button class="btn" onclick="sendDrv(${j.id})">Şoför bilgisini ilet</button>`)
+ :`<div class="shield" style="background:${j.paid?'#f0fdf4':'#fffbeb'}">${j.paid?'✓ Ödeme hesabınıza aktarıldı':'⏳ Ödeme 24 saat içinde hesabınıza aktarılır'}</div>`;
+ const tg=j.st=='new'?'<span class="tag g">Yeni talep</span>':j.st=='ok'?'<span class="tag good">Onaylandı</span>':'<span class="tag">Tamamlandı</span>';
+ return `<div class="job"><div class="hd">${tg}<span class="price">${fm(j.net)}</span></div>
+ <div class="rp"><span class="d"></span><div class="ln"></div><span class="d b"></span></div><div class="rn"><b>${esc(j.from)}</b><b>${esc(j.to)}</b></div>
+ <div class="rc"><span>📅 ${j.when}</span><span>👥 ${j.pax} yolcu</span><span>🧳 ${j.lug}</span><span>🚐 ${j.veh}</span></div>
+ ${j.st=='new'?'<div class="shield">🛡️ Müşteri ödemesi Turista güvencesinde. Net ücret komisyon sonrası tutardır.</div>':''}${act}</div>`}
+function render(){
+ const c=s=>combined().filter(j=>j.st==s);
+ $('jl').innerHTML=c(tab).map(jobCard).join('')||`<div class="empty"><b>${tab=='new'?'🔔':tab=='ok'?'🗓️':'🏁'}</b>${tab=='new'?'Şu an yeni talep yok. Müsait olduğunuzda talepler burada görünür.':tab=='ok'?'Onaylı transferiniz yok. Yeni taleplerden kabul edebilirsiniz.':'Henüz tamamlanan transfer yok.'}</div>`;
+ document.querySelectorAll('#seg button').forEach(b=>{b.classList.toggle('on',b.dataset.s==tab);const n=c(b.dataset.s).length;b.textContent={new:'Yeni',ok:'Onaylı',done:'Tamamlanan'}[b.dataset.s]+(n?' ('+n+')':'')});
+ const nn=c('new').length;$('nb').style.display=nn?'block':'none';$('nb').textContent=nn;$('bb').style.display=nn?'block':'none';$('bb').textContent=nn;
+ const nx=c('ok')[0];$('next').innerHTML=nx?jobCard(nx,1):`<div class="empty">Onaylı transferiniz yok.</div>`;
+ const nw=c('new');$('hnew').innerHTML=nw.length?nw.slice(0,2).map(jobCard).join(''):`<div class="empty">Yeni talep yok.</div>`;
+ const paid=J.filter(j=>j.st=='done'&&j.paid).reduce((a,j)=>a+j.net,0)+9600,hold=J.filter(j=>j.st=='ok'||(j.st=='done'&&!j.paid)).reduce((a,j)=>a+j.net,0);
+ $('em').textContent=fm(paid);$('eh').textContent=fm(hold);
+ $('kp').innerHTML=[['📥','Yeni talep',nn],['🗓️','Onaylı transfer',c('ok').length],['✅','Tamamlanan',c('done').length+14],['⭐','Puan','4.9']].map(k=>`<div class="kp"><i>${k[0]}</i><div><b>${k[2]}</b><small>${k[1]}</small></div></div>`).join('');
+}
+function accept(id){J.find(j=>j.id==id).st='ok';render();toast('Kabul edildi · Şoför bilgisini iletin')}
+function decline(id){J=J.filter(j=>j.id!=id);render();toast('Talep reddedildi')}
+function sendDrv(id){const d=$('dr'+id),p=$('pl'+id);let bad=0;[d,p].forEach(e=>{const x=e.value.trim().length<3;e.style.borderColor=x?'#ef4444':'';bad|=x});if(bad)return;
+ const j=J.find(j=>j.id==id);j.dr=d.value.trim();j.pl=p.value.trim().toUpperCase();j.sent=1;render();toast('SMS müşteriye gönderildi ✓')}
+function finish(id){const j=J.find(j=>j.id==id);j.st='done';j.paid=0;tab='done';render();toast('Transfer tamamlandı')}
+const bars=[['Pzt',40],['Sal',64],['Çar',30],['Per',80],['Cum',56],['Cmt',100],['Paz',44]];
+$('bars').innerHTML=bars.map(b=>`<div><i style="height:${b[1]*.7}%"></i>${b[0]}</div>`).join('');
+document.querySelectorAll('#seg button').forEach(b=>b.onclick=()=>{tab=b.dataset.s;render()});
+function goTab(t){document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.t==t));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id=='v-'+t))}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>goTab(b.dataset.t));
+function openNew(){$('ban').classList.remove('show');tab='new';render();goTab('jobs')}
+function toggleAvail(){ST.avail=ST.avail?0:1;persist();showAvail()}
+function showAvail(){$('av-sw').classList.toggle('on',!!ST.avail);$('avt').textContent=ST.avail?'Müsaitsiniz':'Şu an müsait değilsiniz';$('avs').textContent=ST.avail?'Yeni transfer talepleri size bildirilir.':'Müsait olana kadar yeni talep göndermeyiz.'}
+
+/* ---- Bildirim ---- */
+const NS=[['🔔','Yeni iş talebi','new'],['📲','Anlık bildirim (tarayıcı)','push'],['💬','SMS ile haber ver','sms'],['✉️','E-posta özeti','mail'],['🌙','Gece 23:00-07:00 sessiz','quiet']];
+function drawNS(){$('ns').innerHTML=NS.map(n=>`<div class="li"><em>${n[0]}</em><span>${n[1]}</span><button class="sw${ST.ns[n[2]]?' on':''}" onclick="tgNS('${n[2]}')" aria-label="${n[1]}"></button></div>`).join('')}
+async function tgNS(k){ST.ns[k]=ST.ns[k]?0:1;persist();drawNS();
+ if(k=='push'&&ST.ns.push&&'Notification' in window&&Notification.permission=='default'){try{await Notification.requestPermission()}catch(e){}}}
+function incoming(){
+ if(!ST.avail||!ST.ns.new)return;
+ const j={id:Date.now(),st:'new',from:'İstanbul Havalimanı',to:'Kadıköy',when:'Bugün 21:15',pax:5,lug:6,veh:'Vito / Caravelle',net:2400,cu:'Deniz P.'};
+ J.unshift(j);render();
+ $('bt').textContent='Yeni iş talebi · '+fm(j.net);$('bs').textContent=j.from+' → '+j.to+' · '+j.pax+' yolcu';
+ $('ban').classList.add('show');setTimeout(()=>$('ban').classList.remove('show'),7000);
+ if(navigator.vibrate)navigator.vibrate([80,40,120]);
+ if(ST.ns.push){try{if(Notification.permission=='granted')new Notification('Turista Partner',{body:'Yeni iş talebi: '+j.from+' → '+j.to})}catch(e){}}}
+
+/* ---- Hesap ---- */
+const F={c:'f-c',n:'f-n',p:'f-p',e:'f-e',s:'f-s',a:'f-a'};
+function showAcc(){const a=ST.acc;Object.keys(F).forEach(k=>$(F[k]).value=a[k]||'');
+ $('pn').textContent=a.c||'Firmanız';$('pm').textContent=a.e||a.p||'Bilgilerinizi ekleyin';$('av').textContent=(a.c||a.n||'T')[0].toUpperCase();
+ $('hi').textContent=a.n?'Merhaba, '+a.n.split(' ')[0]+' 👋':'Merhaba 👋';
+ $('sn').textContent=a.c||'Firmanız';$('sm').textContent=a.n||'Hesabı düzenle';$('sav').textContent=(a.c||a.n||'T')[0].toUpperCase()}
+function saveAcc(){const a={};Object.keys(F).forEach(k=>a[k]=$(F[k]).value.trim());ST.acc=a;persist();showAcc();$('sv').textContent='✓ Kaydedildi';setTimeout(()=>$('sv').textContent='Kaydet',1500)}
+
+/* ---- Başvuru ---- */
+const TY={
+ a:{n:'Seyahat acentası (A grubu)',d:'Tur, transfer ve tüm turizm hizmetlerini satabilirsiniz.',i:[
+  ['Acenta ünvanını onaylatın','Bakanlık seçtiğiniz ünvanın uygun olup olmadığını bildirir. Onaydan sonra 30 gün içinde belgelerle TÜRSAB’a başvurulur.'],
+  ['Şirketinizi kurun','Başvuru tüzel kişi adına yapılır: limited veya anonim şirket, ticaret sicil kaydı ve vergi levhası.'],
+  ['Sorumlu müdür atayın','A grubunda en az bir sorumlu müdür şart. Diploma, ikamet, adli sicil, dil yeterliliği ve müdür sözleşmesi istenir.'],
+  ['Uygun işyeri tutun','İşyeri yönetmelikteki nitelikleri taşımalı ve yalnız acentalık için kullanılmalı. Aynı ofiste birden fazla acenta bulunabilir.'],
+  ['Personel ve SGK kaydı','Personel belgeleri, SGK işyeri kodu ve çalışanların T.C. kimlik bilgileri başvuruya eklenir.'],
+  ['Kuruluş teminatını hazırlayın','Banka teminat mektubu gerekir. Tutar grubuna göre değişir ve güncellenir; güncel rakamı TÜRSAB’dan teyit edin.'],
+  ['TÜRSAB’a başvurun, belgeyi alın','Dosya TÜRSAB’a verilir, Bakanlık işletme belgesini düzenler. Üyelik belgeyle kesinleşir; giriş aidatı ödenir.'],
+  ['Online satış kanallarını bildirin','Platform ve uygulamalarda belge numaranız ile acenta unvanınız görünmeli. Kullandığınız satış kanalları Bakanlığa ve TÜRSAB’a bildirilir.']]},
+ t:{n:'Taşıma firması (D2)',d:'Aracınızla transfer yaparsınız; satış için acenta ile çalışırsınız.',i:[
+  ['Şirket ve vergi kaydı','Şirket (veya şahıs) kaydı, vergi levhası ve imza belgesi hazır olmalı.'],
+  ['D2 yetki belgesi','Ulaştırma Bakanlığı’ndan tarifesiz ticari yolcu taşımacılığı için alınır: turizm, otel transferi, özel grup. Taksi gibi şehir içi yolcu almak yasaktır; ihlalde belge iptal edilebilir.'],
+  ['Araç ruhsat, muayene ve yaş şartı','Asgari kapasiteyi sağlayan araçlar 12 yaşından küçük olmalı. Düzenleme değişmiş olabilir; güncel şartı teyit edin.'],
+  ['Araç sigortaları','Zorunlu trafik ve koltuk ferdi kaza poliçelerini yükleyin.'],
+  ['Şoför belgeleri','Ehliyet, SRC, psikoteknik ve sağlık belgeleri ile SGK kaydı.'],
+  ['U-ETDS ve e-Tebligat','D2 sahipleri için sefer, yolcu ve araç bilgisini U-ETDS’ye göndermek zorunludur. Ulusal Elektronik Tebligat da zorunlu.'],
+  ['Acenta sözleşmesi','Acentası olmayan taşıma firması tur veya transfer satamaz (TÜRSAB’ın açıklaması). Çalıştığınız A grubu acentanın sözleşmesini yükleyin.']]}};
+function openSheet(){$('sheet').classList.add('on');drawSheet()}
+function closeSheet(){$('sheet').classList.remove('on');prog()}
+function done(t){return TY[t].i.filter((_,i)=>ST.ck[t+i]).length}
+function prog(){const t=ST.typ,n=done(t),m=TY[t].i.length,pc=ST.sent?100:Math.round(n/m*100);
+ $('ap').style.width=pc+'%';$('sp').style.width=pc+'%';
+ $('as').textContent=ST.sent?'Başvurunuz incelemede. Sonuç bildirimle gelir.':n?n+'/'+m+' adım tamam · '+TY[t].n:'Acenta veya taşıma firması olarak başvurun. Gereken belgeleri adım adım hazırlayın.'}
+function drawSheet(){const t=ST.typ,y=TY[t];
+ if(ST.sent){$('sb').innerHTML=`<div class="ok"><svg viewBox="0 0 52 52"><circle class="c" cx="26" cy="26" r="24"/><path class="k" d="M14 27l8 8 16-17"/></svg><h3>Başvuru alındı</h3><p>${esc(y.n)} başvurunuz incelemede. Eksik belge olursa bildirim ve SMS ile haber veririz.</p></div><button class="btn alt" onclick="ST.sent=0;persist();drawSheet();prog()">Başvuruyu düzenle</button>`;prog();return}
+ const n=done(t),m=y.i.length;
+ $('sst').textContent=n+'/'+m+' adım tamamlandı';
+ $('sb').innerHTML=`<div class="seg" style="margin-top:0"><button class="${t=='a'?'on':''}" onclick="setTyp('a')">Seyahat acentası</button><button class="${t=='t'?'on':''}" onclick="setTyp('t')">Taşıma firması</button></div>
+ <div class="sub" style="margin:-4px 2px 14px">${y.d}</div>
+ ${y.i.map((x,i)=>`<div class="ck${ST.ck[t+i]?' on':''}" onclick="tgCk('${t}',${i})" role="checkbox" aria-checked="${!!ST.ck[t+i]}" tabindex="0"><div class="bx">✓</div><div><b>${x[0]}</b><small>${x[1]}</small></div></div>`).join('')}
+ <label class="lb">${t=='a'?'Acenta işletme belge no':'D2 yetki belge no'}</label><input class="fld" id="bn" placeholder="${t=='a'?'Belgeniz çıkınca girin':'Örn. 12345'}" value="${esc(ST.acc['bn'+t]||'')}" oninput="ST.acc['bn'+ST.typ]=this.value;persist()">
+ <button class="btn" id="go" ${n<m?'disabled':''} onclick="sendApp()">${n<m?(m-n)+' adım kaldı':'Başvuruyu gönder'}</button>
+ <div class="note">Mevzuat ve tutarlar değişebilir. Güncel şartları Kültür ve Turizm Bakanlığı, TÜRSAB ve Ulaştırma Bakanlığı’ndan teyit edin.</div>`;
+ document.querySelectorAll('.ck').forEach(e=>e.onkeydown=ev=>{if(ev.key==' '||ev.key=='Enter'){ev.preventDefault();e.click()}});prog()}
+function setTyp(t){ST.typ=t;persist();drawSheet()}
+function tgCk(t,i){ST.ck[t+i]=!ST.ck[t+i];persist();drawSheet()}
+function sendApp(){ST.sent=1;persist();drawSheet();if(navigator.vibrate)navigator.vibrate([60,40,120])}
+
+showAcc();showAvail();drawNS();render();prog();
+setTimeout(()=>$('splash').classList.add('hide'),2200);
+// Demo: incoming jobs are created by the customer application, not a fabricated timer.
+window.addEventListener('storage',e=>{if(e.key===DEMO_KEY)render()});setInterval(()=>{const v=localStorage.getItem(DEMO_KEY)||'[]';if(v!==window._lastDemoState){window._lastDemoState=v;render()}},1500);
+</script>
+</body>
+</html>
