@@ -16,7 +16,7 @@ window.search=function(){
  const title=root.querySelector(".td-title"),caption=root.querySelector(".td-caption"),stage=root.querySelector(".td-stage");
  let notify=false,version="",lastOffers=0;
  const update=fn=>{const list=store(),item=list.find(x=>x.id===ref);if(!item)return false;const changed=fn(item);if(changed===false)return false;save(list);render(true);return true};
- const notice=message=>{if(notify&&Notification?.permission==="granted"&&!document.hasFocus()){try{new Notification("Turista Transfer",{body:message})}catch{}}};
+ const notice=message=>{if(notify&&"Notification"in window&&Notification.permission==="granted"&&!document.hasFocus()){try{new Notification("Turista Transfer",{body:message})}catch{}}};
  function render(force=false){
   if(!root.isConnected)return;
   const item=store().find(x=>x.id===ref);if(!item)return;
