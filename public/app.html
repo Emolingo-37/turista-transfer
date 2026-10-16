@@ -217,18 +217,18 @@ const PL=[
  ['Galata Kulesi','İstanbul','🗼','linear-gradient(135deg,#2a2468,#13315C)','Boğaz ve tarihi yarımadanın panoramik manzarası; gün batımında ayrı güzel.']];
 
 const PHOTO={
-'Ayasofya':'https://unsplash.com/photos/EwcvNe53bdM/download?force=true&w=1000',
-'Kapadokya':'https://unsplash.com/photos/SagXn7H6HFg/download?force=true&w=1000',
-'Pamukkale':'https://unsplash.com/photos/uYThZZmJFik/download?force=true&w=1000',
-'Efes Antik Kenti':'https://unsplash.com/photos/7cvrgtP97sI/download?force=true&w=1000',
-'Sapanca Gölü':'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=1000&q=85',
-'Galata Kulesi':'https://unsplash.com/photos/abJARx4ZDNI/download?force=true&w=1000'
+'Ayasofya':'https://unsplash.com/photos/eBaTLe9cI3I/download?force=true&w=1000',
+'Kapadokya':'https://unsplash.com/photos/2IRmvGcS7oo/download?force=true&w=1000',
+'Pamukkale':'https://unsplash.com/photos/yoXTR1GbIA0/download?force=true&w=1000',
+'Efes Antik Kenti':'https://unsplash.com/photos/JAgEY9qFJ0g/download?force=true&w=1000',
+'Sapanca Gölü':'https://unsplash.com/photos/7iaCQmJdO_k/download?force=true&w=1000',
+'Galata Kulesi':'https://unsplash.com/photos/Me960O-VYEY/download?force=true&w=1000'
 };
 function photoCard(name,emoji){return `<img loading="lazy" src="${PHOTO[name]}" alt="${name} fotoğrafı" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"><span class="fallback">${emoji}</span>`;}
 $('places').innerHTML=PL.map((p,i)=>`<div class="pl"><div class="im" style="background:${p[3]}">${photoCard(p[0],p[2])}</div><div class="bd"><span class="tag">${p[1]}</span><h3 style="margin-top:8px">${p[0]}</h3><p>${p[4]}</p><button class="sm" onclick="openChat('${p[0]}')">Buraya transfer ayarla</button></div></div>`).join('');
 $('homeplaces').innerHTML=PL.slice(0,5).map(p=>`<div class="pc" onclick="openChat('${p[0]}')"><div class="im" style="background:${p[3]}">${photoCard(p[0],p[2])}</div><div>${p[0]}<small>${p[1]}</small></div></div>`).join('');
 const TL=[['✈️','Havalimanından otele','Havalimanından otele 3 kişiyiz, 2 bavulumuz var','linear-gradient(160deg,#ece8ff,#cdc3ff)'],['👨‍👩‍👧','Aile transferi','Ailemle 5 kişiyiz, çocuk koltuğu lazım','linear-gradient(160deg,#fff1d6,#ffd98a)'],['🚌','Grup transferi','12 kişilik grubumuz var, Sapanca’ya gideceğiz','linear-gradient(160deg,#dbeafe,#a9c6f5)'],['🎈','Kapadokya gezisi','Kapadokya’ya gideceğiz, 4 kişiyiz','linear-gradient(160deg,#fde4f3,#f5b8dc)']];
-const ROUTE_PHOTOS=[PHOTO['Ayasofya'], 'https://unsplash.com/photos/UkWw9cKh6hw/download?force=true&w=800', 'https://unsplash.com/photos/PNW4oeltJGo/download?force=true&w=800', PHOTO['Kapadokya']];
+const ROUTE_PHOTOS=[PHOTO['Ayasofya'], 'https://unsplash.com/photos/TbsRHso3eRM/download?force=true&w=800', 'https://unsplash.com/photos/x0bwQCSW8m0/download?force=true&w=800', PHOTO['Kapadokya']];
 $('routes').innerHTML=TL.map((t,i)=>`<div class="big" style="background:${t[3]};background-image:linear-gradient(180deg,#0a234222,#0a234288),url('${ROUTE_PHOTOS[i]}')" onclick="openChat(0,0,TL[${i}][2])"><i>${t[0]}</i>${t[1]}</div>`).join('');
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x==b));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id=='v-'+b.dataset.t))});
 const SB=supabase.createClient('https://ewrmphldbgvatcnfcxiw.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV3cm1waGxkYmd2YXRjbmZjeGl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwODMwNjksImV4cCI6MjEwNzY1OTA2OX0.wSO5t_aUtfk2_fDHGgsLJiEzHLkaKnrf0e1CB8_ud5U');
