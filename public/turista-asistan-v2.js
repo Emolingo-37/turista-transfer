@@ -1,38 +1,29 @@
 
 /*
- * TURISTA TRANSFER — ASİSTAN V2.1
- * public/turista-asistan-v2.js
- *
- * Mevcut app.html ile birlikte çalışır.
- * Giriş sistemini değiştirmez.
- * Harita önerileri şimdilik yereldir.
- */
+ TURISTA TRANSFER — ASİSTAN V3
+ Sohbet sade, adres düzenleme son formda.
+ Mevcut giriş ve rezervasyon sistemi korunur.
+*/
 
 (() => {
   "use strict";
 
-  // Mevcut çalışan fonksiyonları sakla.
-  const originalShowForm = showForm;
-  const originalSetWay = setWay;
-  const originalGo = go;
-  const originalRouteCard = routeCard;
+  const oldForm = showForm;
+  const oldWay = setWay;
+  const oldGo = go;
+
+  const get = id => document.getElementById(id);
+  const clean = v => String(v ?? "").trim();
+  const lower = v => clean(v).toLocaleLowerCase("tr-TR");
 
   const state = {
     data: {},
     stage: "",
     busy: false,
-    finished: false,
     session: 0
   };
 
-  const clean = value => String(value ?? "").trim();
-
-  const low = value =>
-    clean(value).toLocaleLowerCase("tr-TR");
-
-  const safe = value => esc(clean(value));
-
-  const PURPOSES = [
+  const purposes = [
     "Tatil / gezi",
     "İş seyahati",
     "Havalimanı transferi",
@@ -40,128 +31,75 @@
     "Diğer"
   ];
 
-  const LOCATIONS = [
-    "İstanbul Havalimanı",
-    "Sabiha Gökçen Havalimanı",
-    "Taksim",
-    "Kadıköy",
-    "Beşiktaş",
-    "Sultanahmet",
-    "Şişli",
-    "Bakırköy",
-    "Üsküdar",
-    "Ataşehir",
-    "Sapanca",
-    "Bursa",
-    "Kapadokya",
-    "Antalya"
-  ];
-
-  const QUESTIONS = [
+  const questions = [
     {
       id: "purpose",
-      text: "Öncelikle, bu yolculuğunuzun amacı nedir?",
-      choices: PURPOSES
+      text: "Öncelikle yolculuğunuzun amacı nedir?",
+      options: purposes
     },
     {
       id: "from",
       text: "Anladım. Peki nereden yola çıkacaksınız?",
-      choices: [
-        "İstanbul Havalimanı",
-        "Sabiha Gökçen Havalimanı",
-        "Taksim",
-        "Kadıköy",
-        "Beşiktaş"
-      ]
+      options: [],
+      hint: "İl, ilçe veya kalkış noktanızı yazın."
     },
     {
       id: "to",
       text: "Sizi nereye götürmemizi istersiniz?",
-      choices: [
-        "İstanbul Havalimanı",
-        "Sabiha Gökçen Havalimanı",
-        "Sapanca",
-        "Bursa",
-        "Sultanahmet"
-      ]
+      options: [],
+      hint: "Gideceğiniz konumu yazın."
     },
     {
       id: "pax",
       text: "Kaç kişi seyahat edeceksiniz?",
-      choices: [
-        "1 kişi",
-        "2 kişi",
-        "4 kişi",
-        "8 kişi",
-        "12 kişi",
-        "16 kişi"
+      options: [
+        "1 kişi", "2 kişi", "4 kişi",
+        "8 kişi", "12 kişi", "16 kişi"
       ]
     },
     {
       id: "date",
       text: "Gidişiniz hangi tarihte olacak?",
-      choices: [
-        "Bugün",
-        "Yarın",
-        "Tarih seç"
-      ]
+      options: ["Bugün", "Yarın", "Tarih seç"]
     },
     {
       id: "time",
-      text: "Saat kaçta yola çıkmayı planlıyorsunuz?",
-      choices: [
-        "08:00",
-        "10:00",
-        "12:00",
-        "15:00",
-        "18:00",
-        "Saat seç"
+      text: "Saat kaçta yola çıkmak istersiniz?",
+      options: [
+        "08:00", "10:00", "12:00",
+        "15:00", "18:00", "Saat seç"
       ]
     },
     {
       id: "way",
-      text: "Dönüş yolculuğunuz için de araç ayarlayalım mı?",
-      choices: [
-        "Tek yön",
-        "Gidiş-dönüş"
-      ]
+      text: "Yolculuğunuz tek yön mü, gidiş-dönüş mü olacak?",
+      options: ["Tek yön", "Gidiş-dönüş"]
     },
     {
       id: "returnDate",
-      text: "Dönüşünüz hangi tarihte olacak?",
-      choices: [
-        "Yarın",
-        "Tarih seç"
-      ]
+      text: "Dönüş yolculuğunuz hangi tarihte olacak?",
+      options: ["Yarın", "Tarih seç"]
     },
     {
       id: "returnTime",
-      text: "Dönüşte saat kaçta yola çıkmak istersiniz?",
-      choices: [
-        "09:00",
-        "12:00",
-        "15:00",
-        "18:00",
-        "21:00",
-        "Saat seç"
+      text: "Dönüşte saat kaçta yola çıkacaksınız?",
+      options: [
+        "09:00", "12:00", "15:00",
+        "18:00", "21:00", "Saat seç"
       ]
     },
     {
       id: "lug",
       text: "Yanınızda toplam kaç bavul olacak?",
-      choices: [
-        "0 bavul",
-        "1 bavul",
-        "2 bavul",
-        "4 bavul",
-        "8 bavul",
-        "12 bavul"
+      options: [
+        "0 bavul", "1 bavul", "2 bavul",
+        "4 bavul", "8 bavul", "12 bavul"
       ]
     },
     {
       id: "extras",
-      text: "Son olarak, yolculuğunuz için özel bir isteğiniz var mı?",
-      choices: [
+      text: "Son olarak özel bir isteğiniz var mı?",
+      options: [
         "Yok, teşekkürler",
         "Çocuk koltuğu",
         "İsimle karşılama",
@@ -170,179 +108,149 @@
     }
   ];
 
-  const $id = id => document.getElementById(id);
-
-  function localDate(date) {
-    return iso(date);
+  function today() {
+    return iso(new Date());
   }
 
-  function dateFromText(value) {
-    const text = low(value);
-    const d = new Date();
+  function parseDate(v) {
+    if (lower(v) === "bugün") return today();
 
-    if (text === "bugün") return localDate(d);
-
-    if (text === "yarın") {
+    if (lower(v) === "yarın") {
+      const d = new Date();
       d.setDate(d.getDate() + 1);
-      return localDate(d);
+      return iso(d);
     }
 
-    if (/^\d{4}-\d{2}-\d{2}$/.test(text)) {
-      const [y, m, day] = text.split("-").map(Number);
-      const check = new Date(y, m - 1, day);
+    const s = clean(v);
 
-      if (
-        check.getFullYear() === y &&
-        check.getMonth() === m - 1 &&
-        check.getDate() === day
-      ) return text;
-
-      return "";
-    }
-
-    const m = text.match(
+    const match = s.match(
       /^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/
     );
 
-    if (!m) return "";
+    let result = s;
 
-    const day = Number(m[1]);
-    const month = Number(m[2]);
-    const year = Number(m[3]);
+    if (match) {
+      result =
+        match[3] + "-" +
+        match[2].padStart(2, "0") + "-" +
+        match[1].padStart(2, "0");
+    }
 
-    const check = new Date(year, month - 1, day);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(result)) {
+      return "";
+    }
+
+    const [year, month, day] = result.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
 
     if (
-      check.getFullYear() !== year ||
-      check.getMonth() !== month - 1 ||
-      check.getDate() !== day
+      date.getFullYear() !== year ||
+      date.getMonth() !== month - 1 ||
+      date.getDate() !== day
     ) return "";
 
-    return [
-      year,
-      String(month).padStart(2, "0"),
-      String(day).padStart(2, "0")
-    ].join("-");
+    return result;
   }
 
-  function timeFromText(value) {
-    const m = clean(value).match(
+  function parseTime(v) {
+    const match = clean(v).match(
       /^([01]?\d|2[0-3])[:.]([0-5]\d)$/
     );
 
-    if (!m) return "";
-
-    return m[1].padStart(2, "0") + ":" + m[2];
+    return match
+      ? match[1].padStart(2, "0") + ":" + match[2]
+      : "";
   }
 
-  function numberFromText(value) {
-    const m = clean(value).match(/\d+/);
-    return m ? Number(m[0]) : NaN;
-  }
-
-  function detectPurpose(text) {
-    const t = low(text);
-
-    if (/toplantı|iş seyahati|fuar|kongre/.test(t))
-      return "İş seyahati";
-
-    if (/tatil|gezi|gezmeye|turistik/.test(t))
-      return "Tatil / gezi";
-
-    if (/havalimanı transferi|uçuşum/.test(t))
-      return "Havalimanı transferi";
-
-    if (/aile|akraba|ziyaret/.test(t))
-      return "Aile / özel ziyaret";
-
-    return "";
-  }
-
-  // İlk cümledeki belirgin bilgileri ayır.
-  // Bu fonksiyon soru cevapları üzerinde çalıştırılmaz.
-  function readInitialText(text) {
-    if (!text) return;
-
-    const t = clean(text);
+  function initialDetails(text) {
     const d = state.data;
+    const t = clean(text);
 
-    d.purpose = detectPurpose(t) || "";
-
-    const n = t.match(/(\d+)\s*(kişi|kişilik|yolcu)/i);
-    if (n) d.pax = Number(n[1]);
-
-    const luggage = t.match(/(\d+)\s*(bavul|valiz)/i);
-    if (luggage) d.lug = Number(luggage[1]);
-
-    // Sadece açıkça belirtilen güzergâhı ayrıştır.
-    const route = t.match(
-      /(.+?)(?:'|’)?(?:dan|den|tan|ten)\s+(.+?)(?:'|’)?(?:a|e|ya|ye)\s+(?:gideceğiz|gidiyoruz|gitmek)/i
+    const people = t.match(
+      /(\d+)\s*(?:kişi|kişilik|yolcu)/i
     );
 
-    if (route) {
-      d.from = route[1].trim();
-      d.to = route[2].trim();
-    } else {
-      const dest = t.match(
-        /(?:ile|ekibimizle|grubumuzla)?\s*([\p{L}\s]+?)(?:'|’)?(?:a|e|ya|ye)\s+(?:gideceğiz|gidiyoruz|gitmek)/iu
-      );
+    if (people) d.pax = Number(people[1]);
 
-      if (dest) {
-        const candidate = dest[1].trim();
+    const bags = t.match(
+      /(\d+)\s*(?:bavul|valiz)/i
+    );
 
-        const known = LOCATIONS.find(
-          p => low(candidate).includes(low(p))
-        );
+    if (bags) d.lug = Number(bags[1]);
 
-        if (known) d.to = known;
+    if (/gidiş.dönüş/i.test(t)) {
+      d.way = "Gidiş-dönüş";
+    }
+
+    // Yalnızca konumu açık ve güvenilir biçimde
+    // tespit edebiliyorsak önceden dolduruyoruz.
+    const locations = [
+      "İstanbul Havalimanı",
+      "Sabiha Gökçen Havalimanı",
+      "Sapanca",
+      "Bursa",
+      "Taksim",
+      "Kadıköy",
+      "Kapadokya",
+      "Antalya"
+    ];
+
+    const matches = locations.filter(place =>
+      lower(t).includes(lower(place))
+    );
+
+    if (matches.length === 1) {
+      // Tek konum varsa kalkış olduğunu varsayma.
+      if (!/havalimanından|havaalanından/i.test(t)) {
+        d.to = matches[0];
       }
     }
 
-    if (/gidiş.dönüş|gidip.dön/i.test(t))
-      d.way = "Gidiş-dönüş";
+    if (/iş seyahati|iş toplantısı|fuar/i.test(t)) {
+      d.purpose = "İş seyahati";
+    } else if (/tatil|gezi/i.test(t)) {
+      d.purpose = "Tatil / gezi";
+    }
+
+    const time = t.match(
+      /\b([01]?\d|2[0-3]):([0-5]\d)\b/
+    );
+
+    if (time) {
+      d.time = time[1].padStart(2, "0") + ":" + time[2];
+    }
   }
 
-  function getQuestion() {
+  function nextQuestion() {
     const d = state.data;
 
-    for (const q of QUESTIONS) {
+    return questions.find(q => {
       if (
         ["returnDate", "returnTime"].includes(q.id) &&
         d.way !== "Gidiş-dönüş"
-      ) continue;
+      ) return false;
 
-      if (q.id === "lug") {
-        if (d.lug == null) return q;
-        continue;
-      }
+      if (q.id === "lug") return d.lug == null;
 
       if (q.id === "extras") {
-        if (!d.extrasConfirmed) return q;
-        continue;
+        return !d.extrasConfirmed;
       }
 
-      if (!d[q.id]) return q;
-    }
-
-    return null;
-  }
-
-  function removeOldChoices() {
-    chat.querySelectorAll(".turista-options").forEach(el => {
-      el.remove();
-    });
-
-    chat.querySelectorAll(".turista-picker").forEach(el => {
-      el.remove();
+      return !d[q.id];
     });
   }
 
-  function say(text, callback) {
+  function clearOptions() {
+    chat.querySelectorAll(
+      ".turista-choices, .turista-date-picker"
+    ).forEach(el => el.remove());
+  }
+
+  function message(text, callback) {
     const session = state.session;
-
     state.busy = true;
 
-    bot(safe(text), null, () => {
+    bot(esc(text), null, () => {
       if (session !== state.session) return;
 
       state.busy = false;
@@ -351,51 +259,53 @@
     });
   }
 
-  function createChoices(question) {
-    const container = document.createElement("div");
+  function showChoices(q) {
+    if (!q.options.length) {
+      inp.placeholder = q.hint || "Cevabınızı yazın...";
+      inp.focus();
+      return;
+    }
 
-    container.className = "turista-options";
-    container.dataset.question = question.id;
+    const wrap = document.createElement("div");
+    wrap.className = "turista-choices";
 
-    question.choices.forEach(choice => {
+    q.options.forEach(option => {
       const button = document.createElement("button");
-
       button.type = "button";
-      button.className = "turista-option";
-      button.textContent = choice;
+      button.textContent = option;
 
       button.onclick = () => {
         if (
           state.busy ||
-          state.stage !== question.id ||
+          state.stage !== q.id ||
           mode !== "conversation"
         ) return;
 
-        if (choice === "Tarih seç") {
-          showPicker("date", question.id);
+        if (option === "Tarih seç") {
+          showPicker("date");
           return;
         }
 
-        if (choice === "Saat seç") {
-          showPicker("time", question.id);
+        if (option === "Saat seç") {
+          showPicker("time");
           return;
         }
 
-        submit(choice);
+        submit(option);
       };
 
-      container.appendChild(button);
+      wrap.appendChild(button);
     });
 
-    chat.appendChild(container);
+    chat.appendChild(wrap);
     chat.scrollTop = chat.scrollHeight;
   }
 
-  function showPicker(type, stage) {
-    removeOldChoices();
+  function showPicker(type) {
+    clearOptions();
 
     const box = document.createElement("div");
-    box.className = "turista-picker";
+    box.className = "turista-date-picker";
 
     const input = document.createElement("input");
     input.type = type;
@@ -403,9 +313,9 @@
 
     if (type === "date") {
       input.min =
-        stage === "returnDate" && state.data.date
+        state.stage === "returnDate" && state.data.date
           ? state.data.date
-          : localDate(new Date());
+          : today();
     }
 
     const button = document.createElement("button");
@@ -414,12 +324,7 @@
     button.className = "btn";
 
     button.onclick = () => {
-      if (!input.value) {
-        input.focus();
-        return;
-      }
-
-      submit(input.value);
+      if (input.value) submit(input.value);
     };
 
     box.append(input, button);
@@ -429,180 +334,159 @@
     chat.scrollTop = chat.scrollHeight;
   }
 
-  function askNext() {
-    removeOldChoices();
+  function ask() {
+    clearOptions();
 
-    const question = getQuestion();
+    const q = nextQuestion();
 
-    if (!question) {
-      finishConversation();
+    if (!q) {
+      finish();
       return;
     }
 
-    state.stage = question.id;
+    state.stage = q.id;
 
-    say(question.text, () => {
-      inp.placeholder = "Cevabınızı yazın...";
+    message(q.text, () => showChoices(q));
+  }
 
-      createChoices(question);
+  function error(text) {
+    const q = questions.find(x => x.id === state.stage);
+
+    message(text, () => {
+      if (q) showChoices(q);
     });
   }
 
-  function invalid(message) {
-    say(message, () => {
-      const q = QUESTIONS.find(
-        item => item.id === state.stage
-      );
-
-      if (q) createChoices(q);
-    });
-  }
-
-  function saveAnswer(stage, value) {
+  function save(stage, value) {
     const d = state.data;
     const v = clean(value);
 
-    switch (stage) {
-      case "purpose":
-        if (!PURPOSES.includes(v)) {
-          d.purpose = v;
-        } else {
-          d.purpose = v;
-        }
-        break;
-
-      case "from":
-      case "to":
-        if (v.length < 2) {
-          invalid("Lütfen bir konum belirtin.");
-          return false;
-        }
-
-        if (
-          stage === "to" &&
-          low(v) === low(d.from)
-        ) {
-          invalid("Kalkış ve varış noktaları aynı olamaz.");
-          return false;
-        }
-
-        d[stage] = v;
-        break;
-
-      case "pax": {
-        const n = numberFromText(v);
-
-        if (!Number.isInteger(n) || n < 1 || n > 60) {
-          invalid("Lütfen 1 ile 60 arasında bir yolcu sayısı yazın.");
-          return false;
-        }
-
-        d.pax = n;
-        break;
-      }
-
-      case "lug": {
-        const n = numberFromText(v);
-
-        if (!Number.isInteger(n) || n < 0 || n > 60) {
-          invalid("Lütfen geçerli bir bavul sayısı yazın.");
-          return false;
-        }
-
-        d.lug = n;
-        break;
-      }
-
-      case "date":
-      case "returnDate": {
-        const date = dateFromText(v);
-
-        if (!date || date < localDate(new Date())) {
-          invalid("Geçerli ve geçmişte olmayan bir tarih seçin.");
-          return false;
-        }
-
-        if (
-          stage === "returnDate" &&
-          d.date &&
-          date < d.date
-        ) {
-          invalid("Dönüş tarihi gidişten önce olamaz.");
-          return false;
-        }
-
-        d[stage] = date;
-        break;
-      }
-
-      case "time":
-      case "returnTime": {
-        const time = timeFromText(v);
-
-        if (!time) {
-          invalid("Saati 09:30 şeklinde yazabilir veya seçebilirsiniz.");
-          return false;
-        }
-
-        if (
-          stage === "returnTime" &&
-          d.returnDate === d.date &&
-          time <= d.time
-        ) {
-          invalid("Aynı gün dönüş saati gidiş saatinden sonra olmalı.");
-          return false;
-        }
-
-        d[stage] = time;
-        break;
-      }
-
-      case "way":
-        if (/dönüş/i.test(v)) {
-          d.way = "Gidiş-dönüş";
-        } else if (/tek/i.test(v)) {
-          d.way = "Tek yön";
-          delete d.returnDate;
-          delete d.returnTime;
-        } else {
-          invalid("Lütfen tek yön veya gidiş-dönüş seçin.");
-          return false;
-        }
-        break;
-
-      case "extras": {
-        d.ex = [];
-
-        const matched = EX.find(
-          item => low(item[1]) === low(v)
-        );
-
-        if (matched) {
-          d.ex.push(matched[1]);
-        } else if (!/yok|hayır|teşekkür/i.test(v)) {
-          invalid("Lütfen önerilen özel isteklerden birini seçin.");
-          return false;
-        }
-
-        d.extrasConfirmed = true;
-        break;
-      }
-
-      default:
-        return false;
+    if (stage === "purpose") {
+      d.purpose = v;
+      return true;
     }
 
-    return true;
+    if (stage === "from" || stage === "to") {
+      if (v.length < 2) {
+        error("Lütfen geçerli bir konum yazın.");
+        return false;
+      }
+
+      if (
+        stage === "to" &&
+        lower(d.from) === lower(v)
+      ) {
+        error("Kalkış ve varış noktaları aynı olamaz.");
+        return false;
+      }
+
+      d[stage] = v;
+      return true;
+    }
+
+    if (stage === "pax" || stage === "lug") {
+      const match = v.match(/\d+/);
+      const number = match ? Number(match[0]) : NaN;
+
+      const min = stage === "pax" ? 1 : 0;
+
+      if (
+        !Number.isInteger(number) ||
+        number < min ||
+        number > 60
+      ) {
+        error("Lütfen geçerli bir sayı girin.");
+        return false;
+      }
+
+      d[stage] = number;
+      return true;
+    }
+
+    if (stage === "date" || stage === "returnDate") {
+      const date = parseDate(v);
+
+      if (!date || date < today()) {
+        error("Lütfen geçerli bir tarih seçin.");
+        return false;
+      }
+
+      if (
+        stage === "returnDate" &&
+        d.date &&
+        date < d.date
+      ) {
+        error("Dönüş tarihi gidişten önce olamaz.");
+        return false;
+      }
+
+      d[stage] = date;
+      return true;
+    }
+
+    if (stage === "time" || stage === "returnTime") {
+      const time = parseTime(v);
+
+      if (!time) {
+        error("Lütfen 09:30 gibi bir saat girin.");
+        return false;
+      }
+
+      if (
+        stage === "returnTime" &&
+        d.date === d.returnDate &&
+        time <= d.time
+      ) {
+        error("Dönüş saati, gidiş saatinden sonra olmalı.");
+        return false;
+      }
+
+      d[stage] = time;
+      return true;
+    }
+
+    if (stage === "way") {
+      if (/gidiş.dönüş/i.test(v)) {
+        d.way = "Gidiş-dönüş";
+      } else if (/tek yön/i.test(v)) {
+        d.way = "Tek yön";
+        delete d.returnDate;
+        delete d.returnTime;
+      } else {
+        error("Tek yön veya gidiş-dönüş seçin.");
+        return false;
+      }
+
+      return true;
+    }
+
+    if (stage === "extras") {
+      const matched = EX.find(
+        item => lower(item[1]) === lower(v)
+      );
+
+      if (
+        !matched &&
+        !/yok|hayır|teşekkür/i.test(v)
+      ) {
+        error("Lütfen seçeneklerden birini seçin.");
+        return false;
+      }
+
+      d.ex = matched ? [matched[1]] : [];
+      d.extrasConfirmed = true;
+      return true;
+    }
+
+    return false;
   }
 
-  // Ana sohbet giriş noktası.
-  // Eski openChat çağrılmaz: iki sohbet akışı karışmaz.
+  // SOHBET BAŞLANGICI
   openChat = function(to, from, text) {
     state.session++;
     state.data = {};
     state.stage = "";
     state.busy = true;
-    state.finished = false;
 
     T = {};
     vi = 0;
@@ -614,426 +498,327 @@
 
     chat.innerHTML = "";
     inp.value = "";
+    inp.placeholder = "Cevabınızı yazın...";
 
     mode = "conversation";
 
     step(1);
-    $id("chatv").classList.add("on");
+    get("chatv").classList.add("on");
 
     if (to) state.data.to = clean(to);
     if (from) state.data.from = clean(from);
 
     if (text) {
-      readInitialText(text);
-      add(safe(text), "m me");
+      initialDetails(text);
+      add(esc(text), "m me");
     }
 
-    say(
-      "Merhaba! ✨ Ben Turista Asistan. Yolculuğunuzu birlikte planlayalım. Size birkaç kısa soru soracağım. En sonunda bilgileri istediğiniz gibi düzenleyebilirsiniz.",
-      askNext
+    message(
+      "Merhaba! ✨ Ben Turista Asistan. Yolculuğunuzu birlikte planlayalım. Sonunda bütün bilgileri kendiniz düzenleyebileceksiniz.",
+      ask
     );
   };
 
-  // Her cevap, sadece aktif sorunun alanına kaydedilir.
+  // CEVAPLARI DOĞRU SORUYA KAYDET
   submit = function(value) {
     const v = clean(value || inp.value);
-
     if (!v) return;
 
     if (mode === "form") {
       inp.value = "";
-      say("Bilgileri yukarıdaki seyahat kartından düzenleyebilirsiniz.");
       return;
     }
 
-    if (mode !== "conversation") return;
-    if (state.busy || !state.stage) return;
-
-    inp.value = "";
+    if (
+      mode !== "conversation" ||
+      state.busy ||
+      !state.stage
+    ) return;
 
     const stage = state.stage;
 
-    if (!saveAnswer(stage, v)) return;
+    inp.value = "";
 
-    removeOldChoices();
-    add(safe(v), "m me");
+    if (!save(stage, v)) return;
+
+    clearOptions();
+    add(esc(v), "m me");
 
     state.stage = "";
-
-    askNext();
+    ask();
   };
 
-  function finishConversation() {
-    if (state.finished) return;
-
-    state.finished = true;
+  function finish() {
     state.stage = "";
-    state.busy = true;
-
     mode = "form";
 
-    say(
-      "Harika! ✨ Seyahatinizi planladım. Aşağıdaki özet üzerinden tüm bilgileri kontrol edebilir ve istediğiniz değişiklikleri yapabilirsiniz.",
-      () => {
-        showForm({...state.data});
-      }
+    message(
+      "Seyahat özetinizi hazırladım. ✨ Nereden ve Nereye alanları dahil bütün bilgileri kontrol edebilir, yanlış olanları düzeltebilirsiniz.",
+      () => showForm({...state.data})
     );
   }
 
-  // Mevcut formu koruyup yeni alanlar ekle.
+  // SON DÜZENLENEBİLİR FORM
   showForm = function(data) {
-    originalShowForm(data);
+    oldForm(data);
 
-    const card = $id("tf");
-    if (!card) return;
+    const form = get("tf");
+    if (!form) return;
 
-    const heading = card.querySelector("h4");
+    const heading = form.querySelector("h4");
 
     if (heading) {
-      heading.textContent = "Seyahat özeti";
+      heading.textContent = "Seyahat Özeti";
     }
 
-    // Yolculuk amacı.
     const purposeBox = document.createElement("div");
-
     purposeBox.className = "turista-purpose";
-    purposeBox.innerHTML = `
-      <label class="lb" for="f-purpose">
-        Yolculuk amacı
-      </label>
-      <select class="fld" id="f-purpose">
-        <option value="">Seçiniz</option>
-        ${PURPOSES.map(p =>
-          `<option value="${safe(p)}">${safe(p)}</option>`
-        ).join("")}
-      </select>
-    `;
+
+    const label = document.createElement("label");
+    label.className = "lb";
+    label.textContent = "Yolculuk amacı";
+
+    const select = document.createElement("select");
+    select.className = "fld";
+    select.id = "f-purpose";
+
+    const available = purposes.includes(data.purpose)
+      ? purposes
+      : [...purposes, data.purpose].filter(Boolean);
+
+    available.forEach(p => {
+      const option = document.createElement("option");
+      option.value = p;
+      option.textContent = p;
+      select.appendChild(option);
+    });
+
+    select.value = data.purpose || purposes[0];
+
+    purposeBox.append(label, select);
 
     if (heading) heading.after(purposeBox);
 
-    $id("f-purpose").value = data.purpose || "";
+    const description = document.createElement("p");
+    description.className = "turista-form-description";
 
-    // Açıklama.
-    const info = document.createElement("p");
-    info.className = "turista-info";
+    description.textContent =
+      "Bilgilerinizi kontrol edin. Adresleri ve diğer detayları değiştirebilirsiniz.";
 
-    info.textContent =
-      "Bilgileri kontrol edin. Her alanı değiştirebilirsiniz.";
+    purposeBox.after(description);
 
-    purposeBox.after(info);
+    // Sohbette hiçbir harita menüsü yok.
+    // Adres arama yalnızca bu formda çalışır.
+    ["f-from", "f-to"].forEach(id => {
+      const input = get(id);
+      if (!input) return;
 
-    // Gidiş-dönüş alanları.
-    const segment = card.querySelector(".seg");
+      input.removeAttribute("list");
+      input.autocomplete = "off";
+
+      input.placeholder =
+        id === "f-from"
+          ? "Kalkış adresini yazın"
+          : "Varış adresini yazın";
+
+      const hint = document.createElement("p");
+      hint.className = "turista-address-hint";
+      hint.textContent =
+        "İl, ilçe, otel, havalimanı veya açık adres";
+
+      input.insertAdjacentElement("afterend", hint);
+
+      attachGooglePlaces(input);
+    });
+
+    const segment = form.querySelector(".seg");
 
     if (segment) {
       const returnBox = document.createElement("div");
 
       returnBox.id = "turista-return";
-
       returnBox.innerHTML = `
-        <h4>↩ Dönüş yolculuğu</h4>
-
+        <h4>Dönüş Yolculuğu</h4>
         <div class="two">
           <div style="flex:1;min-width:0">
-            <label class="lb" for="f-return-date">
-              Dönüş tarihi
-            </label>
-
+            <label class="lb">Dönüş tarihi</label>
             <input
+              id="f-return-date"
               class="fld"
               type="date"
-              id="f-return-date"
             >
           </div>
-
           <div style="flex:1;min-width:0">
-            <label class="lb" for="f-return-time">
-              Dönüş saati
-            </label>
-
+            <label class="lb">Dönüş saati</label>
             <input
+              id="f-return-time"
               class="fld"
               type="time"
-              id="f-return-time"
             >
           </div>
         </div>
-
-        <p class="turista-info">
-          Dönüş güzergâhı ters yönde planlanacaktır.
-        </p>
       `;
 
       segment.after(returnBox);
 
-      $id("f-return-date").value =
-        data.returnDate || "";
-
-      $id("f-return-time").value =
-        data.returnTime || "";
+      get("f-return-date").value = data.returnDate || "";
+      get("f-return-time").value = data.returnTime || "";
     }
 
-    const originalDate = $id("f-date");
+    get("f-date")?.addEventListener(
+      "change",
+      updateReturn
+    );
 
-    if (originalDate) {
-      originalDate.addEventListener(
-        "change",
-        updateReturnFields
-      );
-    }
-
-    updateReturnFields();
+    updateReturn();
   };
 
-  function updateReturnFields() {
-    const box = $id("turista-return");
+  function updateReturn() {
+    const box = get("turista-return");
     if (!box) return;
 
-    const enabled = way === "Gidiş-dönüş";
+    box.hidden = way !== "Gidiş-dönüş";
 
-    box.hidden = !enabled;
-
-    const date = $id("f-date");
-    const returnDate = $id("f-return-date");
+    const date = get("f-date");
+    const returnDate = get("f-return-date");
 
     if (date && returnDate) {
-      returnDate.min =
-        date.value || localDate(new Date());
+      returnDate.min = date.value || today();
     }
   }
 
-  // Tek yön / Gidiş-dönüş butonları.
-  setWay = function(button, selectedWay) {
-    originalSetWay(button, selectedWay);
-    updateReturnFields();
+  setWay = function(button, selected) {
+    oldWay(button, selected);
+    updateReturn();
   };
 
-  // Araç aramadan önce bütün tarihleri doğrula.
   go = function() {
-    const purpose = $id("f-purpose");
-
-    if (purpose && !purpose.value) {
-      purpose.classList.add("bad");
-      purpose.focus();
-      return;
-    }
-
-    const from = $id("f-from");
-    const to = $id("f-to");
+    const from = get("f-from");
+    const to = get("f-to");
 
     if (
-      from &&
-      to &&
-      from.value.trim() &&
-      low(from.value) === low(to.value)
+      from?.value.trim() &&
+      lower(from.value) === lower(to?.value)
     ) {
-      to.classList.add("bad");
+      alert("Kalkış ve varış adresleri aynı olamaz.");
       to.focus();
-      alert("Kalkış ve varış noktaları aynı olamaz.");
       return;
     }
 
-    const departureDate = $id("f-date");
-    const departureTime = $id("f-time");
+    const date = get("f-date");
+    const time = get("f-time");
 
-    if (
-      departureDate?.value &&
-      departureDate.value < localDate(new Date())
-    ) {
-      departureDate.classList.add("bad");
-      departureDate.focus();
+    if (date?.value && date.value < today()) {
+      alert("Gidiş tarihi geçmişte olamaz.");
+      date.focus();
       return;
     }
 
-    let returnDateValue = "";
-    let returnTimeValue = "";
+    const returnDate = get("f-return-date");
+    const returnTime = get("f-return-time");
 
     if (way === "Gidiş-dönüş") {
-      const returnDate = $id("f-return-date");
-      const returnTime = $id("f-return-time");
-
-      if (!returnDate.value) {
-        returnDate.classList.add("bad");
-        returnDate.focus();
-        return;
-      }
-
-      if (!returnTime.value) {
-        returnTime.classList.add("bad");
-        returnTime.focus();
+      if (!returnDate?.value || !returnTime?.value) {
+        alert("Dönüş tarihi ve saatini doldurun.");
         return;
       }
 
       if (
-        returnDate.value < departureDate.value ||
+        returnDate.value < date.value ||
         (
-          returnDate.value === departureDate.value &&
-          returnTime.value <= departureTime.value
+          returnDate.value === date.value &&
+          returnTime.value <= time.value
         )
       ) {
         alert(
-          "Dönüş tarihi ve saati, gidişten sonra olmalıdır."
+          "Dönüş tarihi ve saati gidişten sonra olmalıdır."
         );
         return;
       }
-
-      returnDateValue = returnDate.value;
-      returnTimeValue = returnTime.value;
     }
 
-    const selectedPurpose = purpose?.value || "";
+    const purpose = get("f-purpose")?.value || "";
 
-    // Eski araç arama akışını çalıştır.
-    originalGo();
+    const returnInfo =
+      way === "Gidiş-dönüş"
+        ? {
+            iso: returnDate.value + "T" + returnTime.value,
+            text:
+              returnDate.value.split("-").reverse().join(".") +
+              " " + returnTime.value
+          }
+        : null;
 
-    // Sadece başarılı bir arama başlatıldıysa ekle.
+    oldGo();
+
     if (mode === "wait") {
-      T.purpose = selectedPurpose;
+      T.purpose = purpose;
+      T.returnISO = returnInfo?.iso || null;
+      T.returnDate = returnInfo?.text || null;
 
-      T.returnISO = returnDateValue
-        ? `${returnDateValue}T${returnTimeValue}`
-        : null;
+      if (returnInfo) {
+        const card = chat.querySelector(".rt .rc");
 
-      T.returnDate = returnDateValue
-        ? `${returnDateValue.split("-").reverse().join(".")} ${returnTimeValue}`
-        : null;
+        if (card) {
+          const detail = document.createElement("span");
+          detail.textContent = "↩ " + returnInfo.text;
+          card.appendChild(detail);
+        }
+      }
     }
   };
 
-  // Araç arama özetine dönüş bilgisini ekle.
-  routeCard = function() {
-    let html = originalRouteCard();
+  /*
+   GOOGLE MAPS PLACES
+   Yalnızca seyahat özeti formuna bağlanır.
 
-    const returnDate = $id("f-return-date")?.value;
-    const returnTime = $id("f-return-time")?.value;
+   Google Maps API etkinleştirilmediği sürece
+   manuel adres yazma çalışmaya devam eder.
+  */
 
-    if (
-      way !== "Gidiş-dönüş" ||
-      !returnDate ||
-      !returnTime
-    ) return html;
-
-    const formatted =
-      returnDate.split("-").reverse().join(".") +
-      " " +
-      returnTime;
-
-    const returnBadge =
-      `<span>↩ Dönüş: ${safe(formatted)}</span>`;
-
-    html = html.replace(
-      /(<\/div>\s*<\/div>\s*)$/,
-      returnBadge + "$1"
-    );
-
-    return html;
-  };
-
-  // Konum önerileri: gerçek harita API'si değil.
-  // İstanbul gibi genel girdiler için hazır öneriler.
-  function showLocationSuggestions(input) {
-    const old = document.querySelector(
-      ".turista-location-suggestions"
-    );
-
-    if (old) old.remove();
-
-    const value = low(input.value);
-
-    if (value.length < 2) return;
-
-    let suggestions = LOCATIONS.filter(place =>
-      low(place).includes(value)
-    );
-
-    if (
-      value.includes("istanbul") ||
-      value === "ist"
-    ) {
-      suggestions = [
-        "İstanbul Havalimanı",
-        "Sabiha Gökçen Havalimanı",
-        "Taksim",
-        "Kadıköy",
-        "Beşiktaş",
-        "Sultanahmet"
-      ];
+  function attachGooglePlaces(input) {
+    if (!window.google?.maps?.places?.Autocomplete) {
+      return;
     }
 
-    if (!suggestions.length) return;
+    const autocomplete =
+      new google.maps.places.Autocomplete(input, {
+        componentRestrictions: {country: "tr"},
+        fields: [
+          "formatted_address",
+          "name",
+          "geometry",
+          "place_id"
+        ],
+        types: ["geocode", "establishment"]
+      });
 
-    const panel = document.createElement("div");
-    panel.className =
-      "turista-location-suggestions";
+    autocomplete.addListener("place_changed", () => {
+      const place = autocomplete.getPlace();
 
-    suggestions.slice(0, 6).forEach(place => {
-      const item = document.createElement("button");
-      item.type = "button";
-      item.textContent = "📍 " + place;
+      if (!place?.formatted_address) return;
 
-      item.onclick = () => {
-        input.value = place;
-        panel.remove();
+      input.value = place.formatted_address;
+      input.dataset.placeId = place.place_id || "";
 
-        input.dispatchEvent(
-          new Event("input", {bubbles:true})
-        );
-
-        input.focus();
-      };
-
-      panel.appendChild(item);
+      input.dispatchEvent(
+        new Event("change", {bubbles: true})
+      );
     });
-
-    input.parentNode.insertBefore(
-      panel,
-      input.nextSibling
-    );
   }
 
-  // Sohbette konum önerilerini de göster.
-  inp.addEventListener("input", () => {
-    const stage = state.stage;
-
-    const old = document.querySelector(
-      ".turista-location-suggestions"
-    );
-
-    if (old) old.remove();
-
-    if (
-      mode === "conversation" &&
-      (stage === "from" || stage === "to")
-    ) {
-      showLocationSuggestions(inp);
-    }
-  });
-
-  // Sonradan açılan form inputlarına da öneri ekle.
-  document.addEventListener("input", event => {
-    const target = event.target;
-
-    if (
-      target.id === "f-from" ||
-      target.id === "f-to"
-    ) {
-      showLocationSuggestions(target);
-    }
-  });
-
-  // Tasarım: Apple benzeri sistem fontu ve sade kartlar.
+  // SADE VE ESTETİK TASARIM
   const style = document.createElement("style");
 
   style.textContent = `
     #chatv,
-    #chatv button,
     #chatv input,
+    #chatv button,
     #chatv select {
       font-family:
         -apple-system,
         BlinkMacSystemFont,
         "SF Pro Text",
-        "SF Pro Display",
         "Helvetica Neue",
         system-ui,
         sans-serif;
@@ -1042,177 +827,159 @@
     #chatv {
       background:
         radial-gradient(
-          circle at 85% 5%,
-          rgba(109,91,208,.08),
-          transparent 44%
-        ),
-        #f8fafc;
+          circle at 85% 0%,
+          rgba(109,91,208,.07),
+          transparent 45%
+        ), #f8fafc;
     }
 
     #chat .m.bot {
-      font-size:16px;
-      font-weight:500;
-      line-height:1.55;
-      letter-spacing:-.025em;
       color:#0a2342;
+      font-size:15px;
+      line-height:1.55;
+      letter-spacing:-.02em;
+      font-weight:500;
     }
 
-    #chat .m.me {
-      border-radius:20px;
-      padding:12px 16px;
-      font-size:14px;
-    }
-
-    .turista-options {
+    .turista-choices {
       display:flex;
       flex-wrap:wrap;
       gap:9px;
-      margin:4px 0 18px;
       max-width:680px;
+      margin-bottom:14px;
+      flex-shrink:0;
     }
 
-    .turista-option {
-      border:1px solid #e4e8f0;
+    .turista-choices button {
+      border:1px solid #e2e8f0;
       background:#fff;
       color:#0a2342;
-      border-radius:16px;
-      padding:12px 16px;
+      border-radius:14px;
+      padding:11px 15px;
       font-size:13px;
       font-weight:600;
       cursor:pointer;
-      transition:.18s ease;
-      box-shadow:0 3px 12px rgba(10,35,66,.035);
+      transition:background .2s,border-color .2s;
     }
 
-    .turista-option:hover {
-      border-color:#d4af37;
+    .turista-choices button:hover {
       background:#fffbeb;
-      transform:translateY(-1px);
+      border-color:#d4af37;
     }
 
-    .turista-option:active {
-      transform:scale(.98);
-    }
-
-    .turista-picker {
+    .turista-date-picker {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      max-width:400px;
+      padding:12px;
       background:#fff;
       border:1px solid #e2e8f0;
-      padding:14px;
-      border-radius:20px;
-      max-width:320px;
+      border-radius:16px;
     }
 
-    .turista-picker .btn {
-      border-radius:13px;
+    .turista-date-picker input {
+      min-width:0;
+      flex:1;
+    }
+
+    .turista-date-picker button {
+      width:auto;
+      white-space:nowrap;
     }
 
     #chat .card {
-      border:1px solid #e5eaf0;
+      background:#fff;
+      border:1px solid #e2e8f0;
       border-radius:24px;
-      box-shadow:0 12px 36px rgba(10,35,66,.07);
-      max-width:700px;
-      width:100%;
-      margin:6px auto 0;
       padding:18px;
+      box-shadow:0 12px 32px rgba(10,35,66,.06);
     }
 
     #chat #tf > h4 {
+      font-size:17px;
+      font-weight:750;
       color:#0a2342;
-      font-size:16px;
       letter-spacing:-.025em;
       text-transform:none;
-      margin-bottom:14px;
+    }
+
+    .turista-form-description {
+      margin:12px 0;
+      color:#64748b;
+      font-size:12px;
+      line-height:1.5;
+    }
+
+    .turista-address-hint {
+      margin:5px 0 8px;
+      font-size:11px;
+      color:#94a3b8;
     }
 
     #chat .fld {
-      border-radius:14px;
+      border-radius:13px;
+      font-size:14px;
       outline:none;
-      transition:.2s ease;
     }
 
     #chat .fld:focus {
-      border-color:#6d5bd0;
-      box-shadow:0 0 0 3px rgba(109,91,208,.09);
-    }
-
-    .turista-info {
-      font-size:12px;
-      color:#64748b;
-      line-height:1.5;
-      margin:10px 0;
+      border-color:#d4af37;
+      box-shadow:0 0 0 3px rgba(212,175,55,.12);
     }
 
     #turista-return {
       margin-top:14px;
-      border:1px solid #eee7d6;
-      background:#fffdf5;
+      padding:16px;
+      background:#fffcf2;
+      border:1px solid #eee6cf;
       border-radius:18px;
-      padding:15px;
-      animation:in .25s ease;
     }
 
     #turista-return[hidden] {
-      display:none !important;
+      display:none!important;
     }
 
     #turista-return h4 {
-      font-size:14px !important;
-      color:#0a2342 !important;
-      text-transform:none !important;
-    }
-
-    .turista-location-suggestions {
-      display:flex;
-      flex-direction:column;
-      gap:3px;
-      background:#fff;
-      border:1px solid #e2e8f0;
-      border-radius:16px;
-      padding:6px;
-      margin-top:4px;
-      max-height:260px;
-      overflow-y:auto;
-      box-shadow:0 8px 25px rgba(10,35,66,.06);
-      width:100%;
-      flex-shrink:0;
-    }
-
-    .turista-location-suggestions button {
-      border:0;
-      background:#fff;
-      text-align:left;
-      padding:11px 12px;
-      font-size:13px;
+      font-size:14px;
+      text-transform:none;
       color:#0a2342;
-      border-radius:10px;
-      cursor:pointer;
     }
 
-    .turista-location-suggestions button:hover {
-      background:#f1f5f9;
+    #chatv footer {
+      flex:none;
+      min-width:0;
     }
 
-    #chat .lb {
-      font-size:12px;
-      font-weight:600;
+    #chatv footer input {
+      flex:1;
+      min-width:0;
+      width:auto;
+      height:46px;
+      border-radius:24px;
+    }
+
+    #chatv footer button {
+      flex:none;
+      width:46px;
+      height:46px;
+      border-radius:50%;
     }
 
     @media(max-width:600px) {
-      .turista-option {
-        padding:11px 13px;
+      .turista-choices button {
         font-size:12px;
+        padding:10px 13px;
       }
 
       #chat .card {
-        border-radius:20px;
         padding:14px;
+        border-radius:20px;
       }
     }
   `;
 
   document.head.appendChild(style);
 
-  console.info(
-    "Turista Asistan v2.1 yüklendi."
-  );
+  console.info("Turista Asistan V3 hazır.");
 })();
