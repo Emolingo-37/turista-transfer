@@ -61,8 +61,10 @@ async function submit(e) {
       return;
     }
 
-    window.location.href = "/app.html";
-  } catch (err) {
+        window.location.href = "/app.html";
+    return;
+  }
+} catch (err) {
     console.error("Beklenmeyen giriş hatası:", err);
     setMsg("Beklenmeyen hata: " + (err.message || String(err)));
   } finally {
