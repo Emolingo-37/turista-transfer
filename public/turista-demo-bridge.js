@@ -20,16 +20,27 @@ window.search=function(){
  function refresh(){
   const item=read().find(x=>x.id===ref);if(!item||!c.isConnected){clearInterval(timer);return}
   const title=c.querySelector('#offer-title'),info=c.querySelector('#offer-info'),list=c.querySelector('#offer-list'),cancel=c.querySelector('#offer-cancel');
-  const accepted=item.status==='confirmed'||item.status==='driver_assigned'||item.status==='completed';
+  const accepted=['pending_payment','confirmed','driver_assigned','completed'].includes(item.status);const paid=['confirmed','driver_assigned','completed'].includes(item.status);
   const done=item.status==='completed';
   if(item.status==='cancelled'){title.textContent='Talep iptal edildi';info.textContent='Yeni bir transfer talebi oluşturabilirsiniz.';list.replaceChildren();cancel.remove();clearInterval(timer);return}
-  if(accepted){step(3);title.textContent=done?'Transfer tamamlandı':item.status==='driver_assigned'?'Şoför bilgileri hazır':'Teklifiniz onaylandı';info.textContent=done?'Yolculuğunuz tamamlandı.':item.status==='driver_assigned'?'Firma şoför bilgilerini paylaştı.':'Firma onayınızı aldı. Şoför bilgileri bekleniyor.';cancel.remove()}
+  if(accepted){step(3);title.textContent=done?'Transfer tamamlandı':item.status==='pending_payment'?'Yolcu bilgileri ve ödeme':item.status==='driver_assigned'?'Şoför bilgileri hazır':'Rezervasyon alındı';info.textContent=done?'Yolculuğunuz tamamlandı.':item.status==='pending_payment'?'Yolcu bilgilerini tamamlayıp ödeme adımına geçin.':item.status==='driver_assigned'?'Şoför bilgileri paylaşılmıştır.':'Rezervasyonunuz alındı. Şoför bilgileri SMS olarak gönderilecektir.';cancel.remove()}
   else {title.textContent=item.offers?.length?'Araç teklifleri bulundu':'Firmalardan araç aranıyor';info.textContent=item.offers?.length?'Firmalardan gelen teklifleri inceleyin.':'Talebiniz firmalara iletildi. Uygun araç aranıyor.'}
   const offers=accepted?(item.selected?[item.selected]:[]):(item.offers||[]);
   list.innerHTML=offers.map((v,i)=>{const net=Number(v.price),commission=Math.round(net*RATE),total=net+commission;
    return '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:15px;padding:13px;margin:9px 0"><b>'+safe(v.company)+'</b><div style="font-size:13px;color:#64748b;margin:6px 0">'+safe(v.vehicle)+'</div><div class="row"><span>Transfer ücreti</span><b>'+money(net)+'</b></div><div class="row"><span>Turista hizmet bedeli (%12)</span><b>'+money(commission)+'</b></div><div class="row"><span>Toplam</span><b>'+money(total)+'</b></div>'+(accepted?'<div style="padding-top:12px;color:#15803d;font-size:13px;font-weight:700">✓ Teklif kabul edildi</div>':'<button class="btn" data-offer="'+i+'">Teklifi kabul et</button>')+'</div>'
   }).join('')+(item.driver&&accepted?'<div class="shield">Şoför: '+safe(item.driver.name)+' · Plaka: '+safe(item.driver.plate)+'</div>':'');
-  list.querySelectorAll('[data-offer]').forEach(b=>b.onclick=()=>{const a=read(),t=a.find(x=>x.id===ref);if(!t||t.status!=='new')return;const v=t.offers[Number(b.dataset.offer)];if(!v)return;t.selected=v;t.status='confirmed';t.confirmedAt=Date.now();write(a);refresh()});
+  list.querySelectorAll('[data-offer]').forEach(b=>b.onclick=()=>{const a=read(),t=a.find(x=>x.id===ref);if(!t||t.status!=='new')return;const v=t.offers[Number(b.dataset.offer)];if(!v)return;t.selected=v;t.status='pending_payment';t.offerAcceptedAt=Date.now();write(a);refresh()});
+  if(item.status==='pending_payment'){
+    if(!item.passengerDetailsReady){
+      const names=Array.from({length:Math.min(Number(item.pax)||1,40)},(_,i)=>'<label class="lb">'+(i+1)+'. Yolcu</label><input class="fld demo-name" placeholder="Örnek Ad Soyad" autocomplete="off"><input class="fld" value="Kimlik bilgisi ödeme öncesi doğrulanacaktır" disabled>');
+      list.insertAdjacentHTML('beforeend','<div class="card" style="margin-top:12px"><h4>Yolcu bilgileri</h4><p style="font-size:12px;color:#64748b">Bu önizlemede gerçek kimlik bilgisi girmeyin.</p>'+names.join('')+'<button class="btn" id="next-payment">Ödemeye geç</button></div>');
+      list.querySelector('#next-payment').onclick=()=>{const n=[...list.querySelectorAll('.demo-name')];if(n.some(x=>x.value.trim().split(/\\s+/).length<2)){alert('Her yolcu için örnek ad ve soyad yazın.');return}const a=read(),j=a.find(x=>x.id===ref);if(!j||j.status!=='pending_payment')return;j.passengerDetailsReady=true;write(a);refresh()};
+    }else{
+      list.insertAdjacentHTML('beforeend','<div class="card" style="margin-top:12px"><h4>Ödeme</h4><p style="font-size:13px;color:#64748b">Ödeme önizlemesi: Kart bilgisi istemiyoruz, ücret tahsil edilmiyor.</p><button class="btn" id="complete-payment">Öde ve rezervasyonu tamamla</button></div>');
+      list.querySelector('#complete-payment').onclick=()=>{const a=read(),j=a.find(x=>x.id===ref);if(!j||j.status!=='pending_payment'||!j.passengerDetailsReady)return;j.status='confirmed';j.confirmedAt=Date.now();write(a);refresh()};
+    }
+  }
+  if(paid){list.insertAdjacentHTML('beforeend','<div class="ok"><svg viewBox="0 0 52 52" aria-hidden="true"><circle class="c" cx="26" cy="26" r="24"/><path class="k" d="M14 27l8 8 16-17"/></svg><h3>Rezervasyon Alındı</h3><p>Şoför bilgileri SMS olarak gönderilecektir.</p><small>Rezervasyon TT-'+safe(ref)+'</small></div>')}
   (item.offers||[]).forEach(v=>{const oid=ref+'-'+v.created+'-'+v.price;if(!seenOffers.has(oid)){seenOffers.add(oid);announce('Transferiniz için yeni bir fiyat teklifi geldi.')}});
   if(accepted&&item.status==='driver_assigned')announce('Şoför bilgileri hazır.');
  }
