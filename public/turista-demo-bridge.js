@@ -46,22 +46,35 @@ window.search=function(){
   if(paid){list.insertAdjacentHTML('beforeend','<div class="ok"><svg viewBox="0 0 52 52" aria-hidden="true"><circle class="c" cx="26" cy="26" r="24"/><path class="k" d="M14 27l8 8 16-17"/></svg><h3>Rezervasyon Alındı</h3><p>Şoför bilgileri SMS olarak gönderilecektir.</p><small>Rezervasyon TT-'+safe(ref)+'</small></div>')}
   (item.offers||[]).forEach(v=>{const oid=ref+'-'+v.created+'-'+v.price;if(!seenOffers.has(oid)){seenOffers.add(oid);announce('Transferiniz için yeni bir fiyat teklifi geldi.')}});
   if(accepted&&item.status==='driver_assigned')announce('Şoför bilgileri hazır.');
+  attachActions();
  }
- const advancePayment=e=>{
-  const b=e.target.closest?.('#next-payment,#complete-payment');
-  if(!b||!c.contains(b))return;
-  e.preventDefault();e.stopImmediatePropagation();
-  const all=read(),j=all.find(x=>x.id===ref);
-  if(!j||j.status!=='pending_payment')return;
-  if(b.id==='next-payment'){
+ // Bind actions directly to the current rendered elements, independently of bubbling.
+ function attachActions(){
+  const next=c.querySelector('#next-payment');
+  if(next)next.onclick=function(){
+    const a=read(),j=a.find(x=>x.id===ref);
+    if(!j){alert('Talep bulunamadı. Lütfen yeniden deneyin.');return}
+    if(j.status!=='pending_payment'){alert('Talep durumu değişti.');refresh();return}
     j.passengerDetailsReady=true;
-    j.passengerCountVerified=Number(j.pax)||1;
-    write(all);refresh();
-  }else if(j.passengerDetailsReady){
-    j.status='confirmed';j.confirmedAt=Date.now();write(all);refresh();
-  }
- };
- c.addEventListener('click',advancePayment,true);
+    write(a);
+    previousState='';
+    refresh();
+    chat.scrollTop=chat.scrollHeight;
+  };
+  const pay=c.querySelector('#complete-payment');
+  if(pay)pay.onclick=function(){
+    const a=read(),j=a.find(x=>x.id===ref);
+    if(!j||j.status!=='pending_payment')return;
+    j.passengerDetailsReady=true;
+    j.status='confirmed';
+    j.confirmedAt=Date.now();
+    write(a);
+    previousState='';
+    refresh();
+    chat.scrollTop=chat.scrollHeight;
+  };
+ }
+ const originalRefresh=refresh;
  refresh();clearInterval(timer);timer=setInterval(refresh,1000);window.addEventListener('storage',refresh);window.addEventListener(EVENT,refresh);
 };
 })();
