@@ -212,7 +212,12 @@ function jobCard(j,ro){
  <div class="rp"><span class="d"></span><div class="ln"></div><span class="d b"></span></div><div class="rn"><b>${esc(j.from)}</b><b>${esc(j.to)}</b></div>
  <div class="rc"><span>📅 ${j.when}</span><span>👥 ${j.pax} yolcu</span><span>🧳 ${j.lug}</span><span>🚐 ${j.veh}</span></div>
  ${j.st=='new'?'<div class="shield">🛡️ Müşteri ödemesi Turista güvencesinde. Net ücret komisyon sonrası tutardır.</div>':''}${act}</div>`}
-function render(){
+let lastRenderedDemo='',lastRenderedTab='',lastRenderedLocal='';
+function render(force=false){
+ const fingerprint=JSON.stringify(demoRead());
+ const localFingerprint=JSON.stringify(J);
+ if(!force&&fingerprint===lastRenderedDemo&&tab===lastRenderedTab&&localFingerprint===lastRenderedLocal)return;
+ lastRenderedDemo=fingerprint;lastRenderedTab=tab;lastRenderedLocal=localFingerprint;
  const c=s=>combined().filter(j=>j.st==s);
  $('jl').innerHTML=c(tab).map(j=>jobCard(j,false)).join('')||`<div class="empty"><b>${tab=='new'?'🔔':tab=='ok'?'🗓️':'🏁'}</b>${tab=='new'?'Şu an yeni talep yok. Müsait olduğunuzda talepler burada görünür.':tab=='ok'?'Onaylı transferiniz yok. Yeni taleplerden kabul edebilirsiniz.':'Henüz tamamlanan transfer yok.'}</div>`;
  document.querySelectorAll('#seg button').forEach(b=>{b.classList.toggle('on',b.dataset.s==tab);const n=c(b.dataset.s).length;b.textContent={new:'Yeni',ok:'Onaylı',done:'Tamamlanan'}[b.dataset.s]+(n?' ('+n+')':'')});
@@ -231,7 +236,7 @@ function sendDrv(id){const d=$('dr'+id),p=$('pl'+id);let bad=0;[d,p].forEach(e=>
 function finish(id){const j=J.find(j=>j.id==id);j.st='done';j.paid=0;tab='done';render();toast('Transfer tamamlandı')}
 const bars=[['Pzt',40],['Sal',64],['Çar',30],['Per',80],['Cum',56],['Cmt',100],['Paz',44]];
 $('bars').innerHTML=bars.map(b=>`<div><i style="height:${b[1]*.7}%"></i>${b[0]}</div>`).join('');
-document.querySelectorAll('#seg button').forEach(b=>b.onclick=()=>{tab=b.dataset.s;render()});
+document.querySelectorAll('#seg button').forEach(b=>b.onclick=()=>{tab=b.dataset.s;render(true)});
 function goTab(t){document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.t==t));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id=='v-'+t))}
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>goTab(b.dataset.t));
 function openNew(){$('ban').classList.remove('show');tab='new';render();goTab('jobs')}
@@ -303,7 +308,7 @@ function sendApp(){ST.sent=1;persist();drawSheet();if(navigator.vibrate)navigato
 showAcc();showAvail();drawNS();render();prog();
 setTimeout(()=>$('splash').classList.add('hide'),350);
 // Demo: incoming jobs are created by the customer application, not a fabricated timer.
-window.addEventListener('storage',e=>{if(e.key===DEMO_KEY)render()});setInterval(()=>{const v=localStorage.getItem(DEMO_KEY)||'[]';if(v!==window._lastDemoState){window._lastDemoState=v;render()}},1500);
+window.addEventListener('storage',e=>{if(e.key===DEMO_KEY)render()});setInterval(()=>render(),1500);
 </script>
 </body>
 </html>
