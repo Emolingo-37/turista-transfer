@@ -20,7 +20,7 @@ export default function Home() {
               Havalimanı transferi, düğün, okul gezisi ve turizm grupları. Turista, siz ile ulaşım firması arasında güvence olur.
             </p>
             <div className="mt-8 flex gap-3">
-              <Link href="/talep" className="btn">Transfer talep et</Link>
+              <Link href="/sohbet" className="btn">Asistanla transfer ayarla</Link>
               <Link href="/giris" className="rounded-[14px] border border-white/30 px-5 py-3 hover:border-gold">Hesap oluştur</Link>
             </div>
           </div>
